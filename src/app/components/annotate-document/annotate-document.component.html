@@ -2,8 +2,14 @@
   <div class="section-wrapper">
     <h2 class="section-heading">Knowledge Annotated</h2>
     <ul class="annotation-list">
-      <li *ngFor="let concept of bokConcepts">
-        {{ concept }}
+      <li
+        *ngFor="let concept of bokConcepts"
+        (click)="deleteBokConcept(concept)"
+        [ngStyle]="{
+          'background-color': getBackgroundColor(concept) | async
+        }"
+      >
+        {{ concept + " " + getConceptName(concept) }}
       </li>
       <p *ngIf="bokConcepts.length === 0">
         No annotations available. Click on BoK concepts and click add.
@@ -11,8 +17,12 @@
     </ul>
 
     <div class="btn-controls">
-      <button class="p-button add-btn">Add annotation</button>
+      <button class="p-button add-btn" (click)="addAnnotation()">
+        Add annotation
+      </button>
       <button class="p-button clear-btn" (click)="onClear()">Clear all</button>
+      <p *ngIf="message" style="color: var(--danger-color)">{{ message }}</p>
     </div>
   </div>
 </section>
+<bok-visualization [(selectedConcept)]="concept"> </bok-visualization>
