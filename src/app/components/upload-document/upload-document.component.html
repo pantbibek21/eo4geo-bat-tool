@@ -1,0 +1,69 @@
+<section class="document-section">
+  <div class="section-wrapper">
+    <div class="upload-section">
+      <h2 class="section-heading">Upload PDF</h2>
+
+      <div class="input-field">
+        <label for="file" class="p-inputtext w-24rem custom-input"
+          >Upload resource (pdf only)</label
+        >
+        <label for="file" class="p-button browse-btn">Browse file</label>
+
+        <input
+          type="file"
+          accept="application/pdf"
+          id="file"
+          (change)="onFileSelected($event)"
+        />
+      </div>
+
+      <div class="progress-container">
+        <p *ngIf="fileName" id="progress-bar">
+          {{ fileName }} ({{ fileSize }})
+        </p>
+
+        <p *ngIf="pageCount">Page Count: {{ pageCount }}</p>
+
+        <div *ngIf="showProgressBar">
+          <div class="progress-bar" [style.width]="progress + '%'">
+            {{ progress }}%
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="general-section">
+      <h2 class="section-heading">General Information</h2>
+
+      <div class="form-field">
+        <label for="file-name">Title</label>
+        <input
+          id="file-name"
+          type="text"
+          placeholder="No file selected so far.."
+          class="p-inputtext w-21rem"
+          [(ngModel)]="fileName"
+        />
+      </div>
+
+      <div class="form-field">
+        <label for="description">Description</label>
+        <textarea
+          id="description"
+          type="text"
+          placeholder=""
+          rows="10"
+          class="p-inputtext h-6rem"
+        ></textarea>
+      </div>
+
+      <div class="btn-controls">
+        <button class="p-button download-btn" (click)="onDownload()">
+          Download
+        </button>
+
+        <p *ngIf="message" class="error-msg">{{ message }}</p>
+      </div>
+    </div>
+  </div>
+</section>

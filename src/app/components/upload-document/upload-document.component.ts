@@ -1,0 +1,100 @@
+import { Component, OnDestroy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { PDFDocument } from 'pdf-lib';
+
+import { SharedService } from '../../services/shared.service';
+import { Subscription } from 'rxjs';
+
+@Component({
+  selector: 'app-upload-document',
+  imports: [CommonModule, FormsModule],
+  templateUrl: './upload-document.component.html',
+  styleUrl: './upload-document.component.css',
+})
+export class UploadDocumentComponent implements OnDestroy {
+  progress: number = 0;
+  fileName: string = '';
+  fileSize: string = '';
+  pageCount: number = 0;
+  description?: string = '';
+  showProgressBar: boolean = false;
+  isFileAvailable: boolean = false;
+  message: string = '';
+
+  private pdfDoc: PDFDocument | null = null; // Store the PDF globally
+  private subscription: Subscription = new Subscription();
+
+  constructor(private sharedService: SharedService) {
+    this.subscription = this.sharedService.clear$.subscribe(() => {
+      this.onClear();
+    });
+  }
+
+  async onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      const file = input.files[0];
+      this.isFileAvailable = true;
+      this.fileName = file.name;
+      this.fileSize = (file.size / 1024).toFixed(2) + ' KB';
+      this.pageCount = 4;
+      this.showProgressBar = true;
+      this.progress = 0; // Reset progress
+
+      const reader = new FileReader();
+
+      reader.onprogress = (event) => {
+        if (event.lengthComputable) {
+          this.progress = Math.round((event.loaded / event.total) * 100);
+        }
+      };
+
+      reader.onloadend = () => {
+        this.progress = 100; // Complete progress
+      };
+
+      // Start reading the file
+      reader.readAsArrayBuffer(file);
+
+      const arrayBuffer = await file.arrayBuffer();
+      this.pdfDoc = await PDFDocument.load(arrayBuffer);
+
+      this.pageCount = this.pdfDoc.getPageCount();
+      this.description = this.pdfDoc.getSubject() || '';
+    }
+  }
+
+  async onDownload() {
+    // check if file is available; if available, download, otherwise, set error message telling no file available to downlaod!
+    if (this.isFileAvailable && this.pdfDoc) {
+      const pdfBytes = await this.pdfDoc.save();
+
+      // set title and download pdf
+      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = this.fileName;
+      link.click();
+    } else {
+      this.message = 'No file available to download!';
+
+      setTimeout(() => {
+        this.message = '';
+      }, 3000);
+    }
+  }
+
+  onClear() {
+    this.fileName = '';
+    this.fileSize = '';
+    this.description = '';
+    this.isFileAvailable = false;
+    this.pageCount = 0;
+    this.showProgressBar = false;
+  }
+
+  ngOnDestroy() {
+    this.subscription.unsubscribe(); // Unsubscribe to avoid memory leaks
+  }
+}

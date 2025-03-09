@@ -1,0 +1,54 @@
+.section-wrapper {
+  margin: 24px 48px 40px;
+  padding-bottom: 24px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.082);
+}
+
+.annotation-list {
+  padding: 0;
+
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 8px;
+  row-gap: 8px;
+}
+
+.annotation-list li {
+  border: 1px solid rgba(0, 0, 0, 0.349);
+  padding: 8px 12px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.add-btn {
+  background-color: var(--secondary-color);
+  border-color: rgba(0, 0, 0, 0.082);
+  margin-right: 16px;
+}
+
+.add-btn:hover {
+  background-color: var(--hover-color);
+  border-color: var(--hover-color);
+}
+
+.clear-btn {
+  background-color: var(--danger-color);
+}
+
+.clear-btn:hover {
+  background-color: #d1151e;
+}
+
+button:active::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 11;
+  background-color: rgba(0, 0, 0, 0.048);
+}

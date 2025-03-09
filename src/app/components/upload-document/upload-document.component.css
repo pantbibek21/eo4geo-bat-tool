@@ -1,0 +1,96 @@
+.section-wrapper {
+  margin: 24px 48px 40px;
+  padding-bottom: 24px;
+  display: flex;
+  column-gap: 48px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.082);
+}
+
+.upload-section,
+.general-section {
+  width: 50%;
+}
+
+.custom-input {
+  cursor: pointer;
+  margin-right: 12px;
+  display: inline-block;
+}
+
+.browse-btn,
+.download-btn {
+  background-color: var(--secondary-color);
+  border-color: rgba(0, 0, 0, 0.082);
+}
+
+.browse-btn:hover,
+.download-btn:hover {
+  background-color: var(--hover-color);
+  border-color: var(--hover-color);
+}
+
+input[type="file"] {
+  display: none;
+}
+
+.general-section .form-field {
+  margin-bottom: 16px;
+}
+.general-section label {
+  margin-bottom: 8px;
+}
+
+.general-section label,
+.general-section input,
+.general-section textarea {
+  display: block;
+  width: 100% !important;
+}
+
+.general-section input:hover,
+.general-section textarea:hover,
+.general-section input:focus,
+.general-section textarea:active {
+  border-color: var(--hover-color);
+}
+
+.progress-container {
+  overflow: hidden;
+  margin-top: 10px;
+
+  margin: 10px 20px 10px 0px;
+}
+
+.progress-bar {
+  height: 20px;
+  width: 90%;
+  background: green;
+  text-align: center;
+  color: white;
+  line-height: 20px;
+  transition: width 0.2s;
+  border-radius: 4px;
+}
+
+.download-btn {
+  display: block;
+  margin: 0 auto;
+}
+
+button:active::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 11;
+  background-color: rgba(0, 0, 0, 0.048);
+}
+
+.error-msg {
+  color: orangered;
+  text-align: center;
+}
