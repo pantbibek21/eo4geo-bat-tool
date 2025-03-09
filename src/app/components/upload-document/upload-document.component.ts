@@ -62,6 +62,7 @@ export class UploadDocumentComponent implements OnDestroy {
 
       this.pageCount = this.pdfDoc.getPageCount();
       this.description = this.pdfDoc.getSubject() || '';
+      this.updateBoKConcept(this.description);
     }
   }
 
@@ -92,6 +93,10 @@ export class UploadDocumentComponent implements OnDestroy {
     this.isFileAvailable = false;
     this.pageCount = 0;
     this.showProgressBar = false;
+  }
+
+  updateBoKConcept(data: string) {
+    this.sharedService.setBokConcept(data);
   }
 
   ngOnDestroy() {
