@@ -27,13 +27,14 @@ export class AnnotateDocumentComponent {
 
   onClear() {
     this.sharedService.resetBokConcept();
-    console.log(this.sharedService.getBokConcept());
     this.bokConcepts = [];
     // this.sharedService.triggerClear();
   }
 
   deleteBokConcept(concept: string) {
     this.bokConcepts = this.bokConcepts.filter((item) => item !== concept);
+    // delete from global BoK relations array
+    this.sharedService.setBokConcept([...this.bokConcepts]);
   }
 
   addAnnotation() {
