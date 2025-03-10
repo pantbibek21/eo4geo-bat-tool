@@ -62,7 +62,6 @@ export class UploadDocumentComponent implements OnDestroy {
 
       const arrayBuffer = await file.arrayBuffer();
       this.pdfDoc = await PDFDocument.load(arrayBuffer);
-
       this.pageCount = this.pdfDoc.getPageCount();
       this.description = this.pdfDoc.getSubject() || '';
       this.getBoKRelationsArray(this.description); // takes the subject; extracts the BoK relations; and updates bokRelations array
@@ -83,6 +82,12 @@ export class UploadDocumentComponent implements OnDestroy {
   async onDownload() {
     // check if file is available; if available, download, otherwise, set error message telling no file available to downlaod!
     if (this.sharedService.getIsPdfAvailable() && this.pdfDoc) {
+      // fetch the BoK relations and set the metadata configuring the subject in RDF format!
+
+      const latestBoKRelations = this.sharedService.getBokConcept();
+      const relationsMetadata = this.configureMetaData(latestBoKRelations);
+      this.pdfDoc?.setTitle(relationsMetadata);
+      this.pdfDoc?.setSubject(relationsMetadata);
       const pdfBytes = await this.pdfDoc.save();
 
       // set title and download pdf
@@ -116,5 +121,17 @@ export class UploadDocumentComponent implements OnDestroy {
 
   ngOnDestroy() {
     this.subscription.unsubscribe(); // Unsubscribe to avoid memory leaks
+  }
+
+  configureMetaData(relations: string[]) {
+    const title = this.fileName.slice(0, -4);
+    const bokRelations = relations.map(
+      (relation) => 'dc:relation eo4geo:' + relation
+    );
+
+    const bokRelationsString = bokRelations.join('; ');
+    const rdfPrefix = `@prefix dc: <http://purl.org/dc/terms/> . @prefix eo4geo: <http://bok.eo4geo.eu/> . <> dc:title "${title}"; ${bokRelationsString} .`;
+
+    return rdfPrefix;
   }
 }
