@@ -26,6 +26,8 @@ export class AnnotateDocumentComponent {
   ) {}
 
   onClear() {
+    this.sharedService.resetBokConcept();
+    console.log(this.sharedService.getBokConcept());
     this.bokConcepts = [];
     // this.sharedService.triggerClear();
   }
@@ -40,9 +42,8 @@ export class AnnotateDocumentComponent {
 
       setTimeout(() => (this.message = ''), 3000);
     } else {
-      // fetch the color
-
-      this.bokConcepts.push(this.concept);
+      const currentConcepts = this.sharedService.getBokConcept();
+      this.sharedService.setBokConcept([...currentConcepts, this.concept]);
     }
   }
 
@@ -61,11 +62,8 @@ export class AnnotateDocumentComponent {
   ngOnInit() {
     //  Listen for bokConcept updates
     this.sharedService.bokConcept$.subscribe((bok) => {
-      if (typeof bok === 'string') {
-        // Ensure it's a string
-        this.bokConcepts = [...bok.matchAll(/eo4geo:([\w\d-]+)/g)].map(
-          (match) => match[1]
-        );
+      if (bok.length != 0) {
+        this.bokConcepts = bok;
       }
     });
 

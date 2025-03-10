@@ -21,6 +21,7 @@ export class UploadDocumentComponent implements OnDestroy {
   showProgressBar: boolean = false;
   isFileAvailable: boolean = false;
   message: string = '';
+  bokRelations: string[] = [];
 
   private pdfDoc: PDFDocument | null = null; // Store the PDF globally
   private subscription: Subscription = new Subscription();
@@ -62,7 +63,18 @@ export class UploadDocumentComponent implements OnDestroy {
 
       this.pageCount = this.pdfDoc.getPageCount();
       this.description = this.pdfDoc.getSubject() || '';
-      this.updateBoKConcept(this.description);
+      this.getBoKRelationsArray(this.description); // takes the subject; extracts the BoK relations; and updates bokRelations array
+
+      this.updateBoKConcept(this.bokRelations);
+      // create bok concepts array and set the global state
+    }
+  }
+
+  getBoKRelationsArray(subject: string) {
+    if (subject.length != 0 && typeof subject === 'string') {
+      this.bokRelations = [...subject.matchAll(/eo4geo:([\w\d-]+)/g)].map(
+        (match) => match[1]
+      );
     }
   }
 
@@ -95,7 +107,7 @@ export class UploadDocumentComponent implements OnDestroy {
     this.showProgressBar = false;
   }
 
-  updateBoKConcept(data: string) {
+  updateBoKConcept(data: string[]) {
     this.sharedService.setBokConcept(data);
   }
 

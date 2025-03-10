@@ -6,13 +6,21 @@ import { Subject, BehaviorSubject } from 'rxjs';
 })
 export class SharedService {
   private clearSubject = new Subject<void>();
-  private bokConcept = new BehaviorSubject<string>('');
+  private bokConcept = new BehaviorSubject<string[]>([]);
 
   clear$ = this.clearSubject.asObservable();
   bokConcept$ = this.bokConcept.asObservable();
 
-  setBokConcept(value: string) {
+  setBokConcept(value: string[]) {
     this.bokConcept.next(value);
+  }
+
+  getBokConcept(): string[] {
+    return this.bokConcept.getValue();
+  }
+
+  resetBokConcept() {
+    this.bokConcept.next([]);
   }
 
   triggerClear() {
