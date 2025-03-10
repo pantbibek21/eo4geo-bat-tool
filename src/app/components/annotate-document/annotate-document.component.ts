@@ -19,6 +19,7 @@ export class AnnotateDocumentComponent {
   conceptName: string = '';
   conceptColor: string = '';
   message: string = '';
+  isPdfAvailable: boolean = false;
 
   constructor(
     private sharedService: SharedService,
@@ -63,7 +64,9 @@ export class AnnotateDocumentComponent {
   ngOnInit() {
     //  Listen for bokConcept updates
     this.sharedService.bokConcept$.subscribe((bok) => {
-      if (bok.length != 0) {
+      if (this.sharedService.getIsPdfAvailable()) {
+        console.log('pdf: ' + this.sharedService.getIsPdfAvailable());
+        this.isPdfAvailable = true;
         this.bokConcepts = bok;
       }
     });

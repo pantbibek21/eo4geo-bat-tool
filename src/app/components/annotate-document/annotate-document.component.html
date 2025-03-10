@@ -17,10 +17,20 @@
     </ul>
 
     <div class="btn-controls">
-      <button class="p-button add-btn" (click)="addAnnotation()">
+      <button
+        class="p-button add-btn"
+        (click)="addAnnotation()"
+        [disabled]="!isPdfAvailable"
+      >
         Add annotation
       </button>
-      <button class="p-button clear-btn" (click)="onClear()">Clear all</button>
+      <button
+        class="p-button clear-btn"
+        (click)="onClear()"
+        [disabled]="!isPdfAvailable"
+      >
+        Clear all
+      </button>
       <p *ngIf="message" style="color: var(--danger-color)">{{ message }}</p>
     </div>
   </div>

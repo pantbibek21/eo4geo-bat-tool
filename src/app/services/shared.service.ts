@@ -7,6 +7,7 @@ import { Subject, BehaviorSubject } from 'rxjs';
 export class SharedService {
   private clearSubject = new Subject<void>();
   private bokConcept = new BehaviorSubject<string[]>([]);
+  private isPdfAvailable = new BehaviorSubject<boolean>(false);
 
   clear$ = this.clearSubject.asObservable();
   bokConcept$ = this.bokConcept.asObservable();
@@ -21,6 +22,14 @@ export class SharedService {
 
   resetBokConcept() {
     this.bokConcept.next([]);
+  }
+
+  getIsPdfAvailable() {
+    return this.isPdfAvailable.getValue();
+  }
+
+  setIsPdfAvailable(value: boolean) {
+    this.isPdfAvailable.next(value);
   }
 
   triggerClear() {

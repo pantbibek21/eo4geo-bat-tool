@@ -19,7 +19,7 @@ export class UploadDocumentComponent implements OnDestroy {
   pageCount: number = 0;
   description?: string = '';
   showProgressBar: boolean = false;
-  isFileAvailable: boolean = false;
+  // isFileAvailable: boolean = false;
   message: string = '';
   bokRelations: string[] = [];
 
@@ -36,12 +36,14 @@ export class UploadDocumentComponent implements OnDestroy {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      this.isFileAvailable = true;
+      // this.isFileAvailable = true;
       this.fileName = file.name;
       this.fileSize = (file.size / 1024).toFixed(2) + ' KB';
       this.pageCount = 4;
       this.showProgressBar = true;
       this.progress = 0; // Reset progress
+
+      this.sharedService.setIsPdfAvailable(true);
 
       const reader = new FileReader();
 
@@ -80,7 +82,7 @@ export class UploadDocumentComponent implements OnDestroy {
 
   async onDownload() {
     // check if file is available; if available, download, otherwise, set error message telling no file available to downlaod!
-    if (this.isFileAvailable && this.pdfDoc) {
+    if (this.sharedService.getIsPdfAvailable() && this.pdfDoc) {
       const pdfBytes = await this.pdfDoc.save();
 
       // set title and download pdf
@@ -102,7 +104,8 @@ export class UploadDocumentComponent implements OnDestroy {
     this.fileName = '';
     this.fileSize = '';
     this.description = '';
-    this.isFileAvailable = false;
+    // this.isFileAvailable = false;
+    this.sharedService.setIsPdfAvailable(false);
     this.pageCount = 0;
     this.showProgressBar = false;
   }

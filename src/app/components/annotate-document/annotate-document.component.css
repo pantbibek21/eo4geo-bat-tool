@@ -6,7 +6,7 @@
 
 .annotation-list {
   padding: 0;
-
+  margin-bottom: 32px;
   list-style: none;
   display: flex;
   flex-wrap: wrap;
