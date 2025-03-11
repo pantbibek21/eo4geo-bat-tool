@@ -37,8 +37,8 @@ export class UploadDocumentComponent implements OnDestroy {
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
       // this.isFileAvailable = true;
-      this.fileName = file.name;
-      this.fileSize = (file.size / 1024).toFixed(2) + ' KB';
+      this.fileName = file.name.slice(0, -4);
+      this.fileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
       this.pageCount = 4;
       this.showProgressBar = true;
       this.progress = 0; // Reset progress
@@ -86,7 +86,7 @@ export class UploadDocumentComponent implements OnDestroy {
 
       const latestBoKRelations = this.sharedService.getBokConcept();
       const relationsMetadata = this.configureMetaData(latestBoKRelations);
-      this.pdfDoc?.setTitle(relationsMetadata);
+      this.pdfDoc?.setTitle(this.fileName);
       this.pdfDoc?.setSubject(relationsMetadata);
       const pdfBytes = await this.pdfDoc.save();
 
@@ -124,7 +124,7 @@ export class UploadDocumentComponent implements OnDestroy {
   }
 
   configureMetaData(relations: string[]) {
-    const title = this.fileName.slice(0, -4);
+    const title = this.fileName;
     const bokRelations = relations.map(
       (relation) => 'dc:relation eo4geo:' + relation
     );
