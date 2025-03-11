@@ -94,3 +94,27 @@ button:active::after {
   color: orangered;
   text-align: center;
 }
+
+/* Media Queries */
+
+@media screen and (max-width: 1160px) {
+  .custom-input {
+    min-width: 100%;
+  }
+
+  .browse-btn {
+    margin-top: 12px;
+    display: inline-block;
+  }
+}
+
+@media screen and (max-width: 856px) {
+  .section-wrapper {
+    flex-direction: column;
+  }
+
+  .upload-section,
+  .general-section {
+    width: 100%;
+  }
+}
