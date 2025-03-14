@@ -17,18 +17,6 @@
   display: inline-block;
 }
 
-.browse-btn,
-.download-btn {
-  background-color: var(--secondary-color);
-  border-color: rgba(0, 0, 0, 0.082);
-}
-
-.browse-btn:hover,
-.download-btn:hover {
-  background-color: var(--hover-color);
-  border-color: var(--hover-color);
-}
-
 input[type="file"] {
   display: none;
 }
@@ -75,19 +63,6 @@ input[type="file"] {
 .download-btn {
   display: block;
   margin: 0 auto;
-}
-
-button:active::after {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  bottom: 0;
-  right: 0;
-  width: 100%;
-  height: 100%;
-  z-index: 11;
-  background-color: rgba(0, 0, 0, 0.048);
 }
 
 .error-msg {

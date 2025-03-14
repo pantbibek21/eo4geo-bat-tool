@@ -7,7 +7,9 @@
         <label for="file" class="p-inputtext w-24rem custom-input"
           >Upload resource (pdf only)</label
         >
-        <label for="file" class="p-button browse-btn">Browse file</label>
+        <label for="file" class="p-button browse-btn custom-button"
+          >Browse file</label
+        >
 
         <input
           type="file"
@@ -58,7 +60,10 @@
       </div>
 
       <div class="btn-controls">
-        <button class="p-button download-btn" (click)="onDownload()">
+        <button
+          class="p-button download-btn custom-button"
+          (click)="onDownload()"
+        >
           Download
         </button>
 
