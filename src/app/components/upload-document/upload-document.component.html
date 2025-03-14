@@ -16,6 +16,7 @@
           accept="application/pdf"
           id="file"
           (change)="onFileSelected($event)"
+          class="p-inputtext custom-input"
         />
       </div>
 
@@ -43,7 +44,7 @@
           id="file-name"
           type="text"
           placeholder="No file selected so far.."
-          class="p-inputtext w-21rem"
+          class="p-inputtext w-21rem custom-input"
           [(ngModel)]="fileName"
         />
       </div>
@@ -55,7 +56,7 @@
           type="text"
           placeholder=""
           rows="10"
-          class="p-inputtext h-6rem"
+          class="p-inputtext h-6rem custom-input"
         ></textarea>
       </div>
 

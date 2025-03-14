@@ -35,13 +35,6 @@ input[type="file"] {
   width: 100% !important;
 }
 
-.general-section input:hover,
-.general-section textarea:hover,
-.general-section input:focus,
-.general-section textarea:active {
-  border-color: var(--hover-color);
-}
-
 .progress-container {
   overflow: hidden;
   margin-top: 10px;
@@ -56,7 +49,7 @@ input[type="file"] {
   text-align: center;
   color: white;
   line-height: 20px;
-  transition: width 0.2s;
+  transition: width 0.3s;
   border-radius: 4px;
 }
 

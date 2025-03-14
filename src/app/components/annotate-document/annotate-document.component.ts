@@ -5,7 +5,7 @@ import {
   BokComponent,
   BokInformationService,
 } from '@eo4geo/ngx-bok-visualization';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-annotate-document',
@@ -50,7 +50,9 @@ export class AnnotateDocumentComponent {
   }
 
   getBackgroundColor(concept: string): Observable<string> {
-    return this.bokInfoService.getConceptColor(concept);
+    return this.bokInfoService
+      .getConceptColor(concept)
+      .pipe(map((hex) => this.hexToRgba(hex, 0.5)));
   }
 
   getConceptName(concept: string) {
@@ -59,6 +61,26 @@ export class AnnotateDocumentComponent {
     });
 
     return this.conceptName;
+  }
+
+  private hexToRgba(hex: string, alpha: number): string {
+    // Remove the hash if it exists
+    hex = hex.replace(/^#/, '');
+
+    // Parse r, g, b values
+    let r: number, g: number, b: number;
+    if (hex.length === 3) {
+      // Convert shorthand hex (e.g., #abc to #aabbcc)
+      r = parseInt(hex[0] + hex[0], 16);
+      g = parseInt(hex[1] + hex[1], 16);
+      b = parseInt(hex[2] + hex[2], 16);
+    } else {
+      r = parseInt(hex.substring(0, 2), 16);
+      g = parseInt(hex.substring(2, 4), 16);
+      b = parseInt(hex.substring(4, 6), 16);
+    }
+
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
   }
 
   ngOnInit() {

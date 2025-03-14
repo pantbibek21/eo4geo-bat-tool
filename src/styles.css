@@ -30,3 +30,8 @@ body {
     black 10%
   );
 }
+
+.custom-input {
+  --p-inputtext-focus-border-color: var(--hover-color);
+  --p-inputtext-hover-border-color: var(--hover-color);
+}
