@@ -16,21 +16,20 @@
 
 .annotation-list li {
   border: 1px solid rgba(0, 0, 0, 0.349);
-  padding: 8px 22px 8px 12px;
+  padding: 8px 12px;
   border-radius: 12px;
   cursor: pointer;
   box-sizing: content-box;
   position: relative;
 }
 
-.annotation-list li:hover:after {
-  content: "x";
-  color: var(--danger-color);
-  position: absolute;
-  top: 8px;
-  right: 6px;
-}
-
 .add-btn {
   margin-right: 16px;
+}
+
+.cross-icon {
+  display: inline-block;
+  position: relative;
+  top: 2px;
+  margin-left: 4px;
 }
