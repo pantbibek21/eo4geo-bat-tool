@@ -26,18 +26,21 @@ export class AnnotateDocumentComponent {
     private bokInfoService: BokInformationService
   ) {}
 
+  // clears the input fields and progress bar
   onClear() {
     this.sharedService.resetBokConcept();
     this.bokConcepts = [];
-    // this.sharedService.triggerClear();
   }
 
+  // delete individual BoK keyword
   deleteBokConcept(concept: string) {
     this.bokConcepts = this.bokConcepts.filter((item) => item !== concept);
-    // delete from global BoK relations array
+
+    // update the global BoK relations array too
     this.sharedService.setBokConcept([...this.bokConcepts]);
   }
 
+  // updates the BoK annotation
   addAnnotation() {
     if (this.bokConcepts.includes(this.concept)) {
       this.message = 'Concept already included!';
@@ -49,12 +52,14 @@ export class AnnotateDocumentComponent {
     }
   }
 
+  // gets the background color of click BoK bubble and adds light opacity
   getBackgroundColor(concept: string): Observable<string> {
     return this.bokInfoService
       .getConceptColor(concept)
       .pipe(map((hex) => this.hexToRgba(hex, 0.5)));
   }
 
+  // fetches the BoK keyword title
   getConceptName(concept: string) {
     this.bokInfoService.getConceptName(concept).subscribe((name) => {
       this.conceptName = name;
@@ -63,6 +68,7 @@ export class AnnotateDocumentComponent {
     return this.conceptName;
   }
 
+  // makes the BoK tags light adding opacity
   private hexToRgba(hex: string, alpha: number): string {
     // Remove the hash if it exists
     hex = hex.replace(/^#/, '');

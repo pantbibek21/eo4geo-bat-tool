@@ -2,7 +2,6 @@ import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PDFDocument } from 'pdf-lib';
-
 import { SharedService } from '../../services/shared.service';
 import { Subscription } from 'rxjs';
 
@@ -13,6 +12,7 @@ import { Subscription } from 'rxjs';
   styleUrl: './upload-document.component.css',
 })
 export class UploadDocumentComponent implements OnDestroy {
+  // define the variables
   progress: number = 0;
   fileName: string = '';
   fileSize: string = '';
@@ -32,21 +32,24 @@ export class UploadDocumentComponent implements OnDestroy {
     });
   }
 
+  // triggers when file is loaded
   async onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       const file = input.files[0];
-      // this.isFileAvailable = true;
       this.fileName = file.name.slice(0, -4);
-      this.fileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB';
+      this.fileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB'; // store size in mb
       this.pageCount = 4;
       this.showProgressBar = true;
       this.progress = 0; // Reset progress
 
+      // update the service
       this.sharedService.setIsPdfAvailable(true);
 
+      // create a reader object
       const reader = new FileReader();
 
+      // calculate the progress during file upload
       reader.onprogress = (event) => {
         if (event.lengthComputable) {
           this.progress = Math.round((event.loaded / event.total) * 100);
@@ -57,20 +60,25 @@ export class UploadDocumentComponent implements OnDestroy {
         this.progress = 100; // Complete progress
       };
 
-      // Start reading the file
+      // start reading the file
       reader.readAsArrayBuffer(file);
 
       const arrayBuffer = await file.arrayBuffer();
       this.pdfDoc = await PDFDocument.load(arrayBuffer);
       this.pageCount = this.pdfDoc.getPageCount();
-      this.bokKeywordsRDFstring = this.pdfDoc.getSubject() || '';
-      this.getBoKRelationsArray(this.bokKeywordsRDFstring); // takes the subject; extracts the BoK relations; and updates bokRelations array
 
+      // subject key stores our RDF formatted string holding BoK relations and description together
+      this.bokKeywordsRDFstring = this.pdfDoc.getSubject() || '';
+
+      // takes the subject; extracts the BoK relations; and updates bokRelations array
+      this.getBoKRelationsArray(this.bokKeywordsRDFstring);
+
+      // updates BoK keywords in service to be globally avaiable to be used in annotation component
       this.updateBoKConcept(this.bokRelations);
-      // create bok concepts array and set the global state
     }
   }
 
+  // function extracts the description and BoK relations
   getBoKRelationsArray(subject: string) {
     const regex = /description\$\s*(.*)/;
     const match = subject.match(regex);
@@ -87,10 +95,13 @@ export class UploadDocumentComponent implements OnDestroy {
     // check if file is available; if available, download, otherwise, set error message telling no file available to downlaod!
     if (this.sharedService.getIsPdfAvailable() && this.pdfDoc) {
       // fetch the BoK relations and set the metadata configuring the subject in RDF format!
-
       const latestBoKRelations = this.sharedService.getBokConcept();
+
+      // function returns the configured string in RDF format
       const relationsMetadata = this.configureMetaData(latestBoKRelations);
       this.pdfDoc?.setTitle(this.fileName);
+
+      // stores the RDF format string holding BoK keys and relations
       this.pdfDoc?.setSubject(relationsMetadata);
       const pdfBytes = await this.pdfDoc.save();
 
@@ -109,16 +120,17 @@ export class UploadDocumentComponent implements OnDestroy {
     }
   }
 
+  // clears the inputs fields and progress bar
   onClear() {
     this.fileName = '';
     this.fileSize = '';
     this.bokKeywordsRDFstring = '';
-    // this.isFileAvailable = false;
     this.sharedService.setIsPdfAvailable(false);
     this.pageCount = 0;
     this.showProgressBar = false;
   }
 
+  // updates the service with Bok keywords
   updateBoKConcept(data: string[]) {
     this.sharedService.setBokConcept(data);
   }
@@ -127,6 +139,7 @@ export class UploadDocumentComponent implements OnDestroy {
     this.subscription.unsubscribe(); // Unsubscribe to avoid memory leaks
   }
 
+  // creates a RDF formatted string for BoK keywords and description
   configureMetaData(relations: string[]) {
     const title = this.fileName;
     const bokRelations = relations.map(

@@ -5,9 +5,9 @@ import { Subject, BehaviorSubject } from 'rxjs';
   providedIn: 'root',
 })
 export class SharedService {
-  private clearSubject = new Subject<void>();
-  private bokConcept = new BehaviorSubject<string[]>([]);
-  private isPdfAvailable = new BehaviorSubject<boolean>(false);
+  private clearSubject = new Subject<void>(); // used to clear form fields and progress
+  private bokConcept = new BehaviorSubject<string[]>([]); // holds the BoK relations
+  private isPdfAvailable = new BehaviorSubject<boolean>(false); // boolean to add dynamic classes later to enable buttons
 
   clear$ = this.clearSubject.asObservable();
   bokConcept$ = this.bokConcept.asObservable();
