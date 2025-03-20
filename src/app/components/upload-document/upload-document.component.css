@@ -12,9 +12,9 @@
 }
 
 .custom-input {
-  cursor: pointer;
   margin-right: 12px;
   display: inline-block;
+  width: 24rem;
 }
 
 input[type="file"] {
@@ -67,7 +67,7 @@ input[type="file"] {
 
 @media screen and (max-width: 1160px) {
   .custom-input {
-    min-width: 100%;
+    width: 100%;
   }
 
   .browse-btn {
