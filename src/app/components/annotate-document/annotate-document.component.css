@@ -33,3 +33,7 @@
   top: 2px;
   margin-left: 4px;
 }
+
+.disable-btn {
+  opacity: 0.6;
+}

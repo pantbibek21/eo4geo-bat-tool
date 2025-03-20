@@ -19,6 +19,7 @@
 
     <div class="btn-controls">
       <button
+        [ngClass]="{ 'disable-btn': !isPdfAvailable }"
         class="p-button add-btn custom-button"
         (click)="addAnnotation()"
         [disabled]="!isPdfAvailable"
@@ -26,6 +27,7 @@
         Add annotation
       </button>
       <button
+        [ngClass]="{ 'disable-btn': !isPdfAvailable }"
         class="p-button clear-btn custom-button"
         (click)="onClear()"
         [disabled]="!isPdfAvailable"
