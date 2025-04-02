@@ -9,7 +9,7 @@
           'background-color': getBackgroundColor(concept) | async
         }"
       >
-        {{ concept + " " + getConceptName(concept) }}
+        {{ concept + " " + (getConceptName(concept) | async) }}
         <span class="pi pi-times-circle cross-icon"></span>
       </li>
       <p *ngIf="bokConcepts.length === 0">

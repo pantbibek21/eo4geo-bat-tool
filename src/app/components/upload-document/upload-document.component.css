@@ -3,6 +3,7 @@
   padding-bottom: 24px;
   display: flex;
   flex-direction: column;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.082);
 }
 
 .custom-input {
@@ -45,15 +46,6 @@ input[type="file"] {
   line-height: 20px;
   transition: width 0.3s;
   border-radius: 4px;
-}
-
-.download-btn {
-  display: block;
-}
-
-.error-msg {
-  color: orangered;
-  text-align: center;
 }
 
 /* Media Queries */

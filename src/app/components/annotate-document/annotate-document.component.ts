@@ -1,10 +1,8 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SharedService } from '../../services/shared.service';
-import {
-  BokInformationService,
-} from '@eo4geo/ngx-bok-visualization';
-import { map, Observable } from 'rxjs';
+import { BokInformationService } from '@eo4geo/ngx-bok-visualization';
+import { map, Observable, Subscription, take } from 'rxjs';
+import { FileService } from '../../services/file.service';
 
 @Component({
   selector: 'app-annotate-document',
@@ -12,59 +10,63 @@ import { map, Observable } from 'rxjs';
   templateUrl: './annotate-document.component.html',
   styleUrl: './annotate-document.component.css',
 })
-export class AnnotateDocumentComponent {
-  bokConcepts: string[] = [];
+export class AnnotateDocumentComponent implements OnInit, OnDestroy {
   @Input() concept: string = 'GIST';
-  conceptName: string = '';
-  conceptColor: string = '';
+  bokConcepts: string[] = [];
   message: string = '';
   isPdfAvailable: boolean = false;
 
-  constructor(
-    private sharedService: SharedService,
-    private bokInfoService: BokInformationService
-  ) {}
+  private bokConceptsSubscription!: Subscription;
+  private isPdfAvailableSuscription!: Subscription; 
 
-  // clears the input fields and progress bar
+  constructor(private fileService: FileService, private bokInfoService: BokInformationService) {}
+
+  ngOnInit() {
+    this.bokConceptsSubscription = this.fileService.bokConcept$.subscribe(concepts => {
+      this.bokConcepts = concepts;
+    });
+
+    this.isPdfAvailableSuscription = this.fileService.pdfFile$.subscribe(file => {
+      this.isPdfAvailable = file != null;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.bokConceptsSubscription.unsubscribe();
+    this.isPdfAvailableSuscription.unsubscribe();
+  }
+
   onClear() {
-    this.sharedService.resetBokConcept();
-    this.bokConcepts = [];
+    this.fileService.setBokConcept([]);
   }
 
-  // delete individual BoK keyword
   deleteBokConcept(concept: string) {
-    this.bokConcepts = this.bokConcepts.filter((item) => item !== concept);
-
-    // update the global BoK relations array too
-    this.sharedService.setBokConcept([...this.bokConcepts]);
+    this.fileService.setBokConcept(this.bokConcepts.filter((item) => item !== concept));
   }
 
-  // updates the BoK annotation
   addAnnotation() {
     if (this.bokConcepts.includes(this.concept)) {
       this.message = 'Concept already included!';
 
       setTimeout(() => (this.message = ''), 3000);
     } else {
-      const currentConcepts = this.sharedService.getBokConcept();
-      this.sharedService.setBokConcept([...currentConcepts, this.concept]);
+      this.fileService.setBokConcept([...this.bokConcepts, this.concept]);
     }
   }
 
-  // gets the background color of click BoK bubble and adds light opacity
   getBackgroundColor(concept: string): Observable<string> {
-    return this.bokInfoService
-      .getConceptColor(concept)
-      .pipe(map((hex) => this.hexToRgba(hex, 0.5)));
+    return this.bokInfoService.getConceptColor(concept).pipe(
+      take(1),
+      map((hex) => this.hexToRgba(hex, 0.5))
+    );
   }
 
   // fetches the BoK keyword title
   getConceptName(concept: string) {
-    this.bokInfoService.getConceptName(concept).subscribe((name) => {
-      this.conceptName = name;
-    });
-
-    return this.conceptName;
+    return this.bokInfoService.getConceptName(concept).pipe(
+      take(1),
+      map((name) => name)
+    );
   }
 
   // makes the BoK tags light adding opacity
@@ -86,21 +88,5 @@ export class AnnotateDocumentComponent {
     }
 
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
-  }
-
-  ngOnInit() {
-    //  Listen for bokConcept updates
-    this.sharedService.bokConcept$.subscribe((bok) => {
-      if (this.sharedService.getIsPdfAvailable()) {
-        console.log('pdf: ' + this.sharedService.getIsPdfAvailable());
-        this.isPdfAvailable = true;
-        this.bokConcepts = bok;
-      }
-    });
-
-    // Get concept name
-    this.bokInfoService.getConceptName('GIST').subscribe((name) => {
-      this.conceptName = name;
-    });
   }
 }

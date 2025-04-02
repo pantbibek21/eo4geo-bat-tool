@@ -1,3 +1,15 @@
 .max-w-half {
     max-width: 50vw;
 }
+
+.download-btn {
+    display: block;
+}
+
+.error-msg {
+    color: orangered;
+}
+
+.btn-controls {
+    margin: 24px 48px 40px;
+}
