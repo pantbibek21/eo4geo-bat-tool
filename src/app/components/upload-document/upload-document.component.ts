@@ -2,8 +2,6 @@ import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { PDFDocument } from 'pdf-lib';
-import { SharedService } from '../../services/shared.service';
-import { Subscription } from 'rxjs';
 import { FileService } from '../../services/file.service';
 
 @Component({
