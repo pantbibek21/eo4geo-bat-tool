@@ -1,3 +1,11 @@
-<app-introduction></app-introduction>
-<app-upload-document></app-upload-document>
-<app-annotate-document></app-annotate-document>
+<div class="flex flex-wrap">
+    <div class="flex-1 p-3 overflow-auto min-w-screen lg:min-w-0 max-h-full lg:max-h-screen">
+        <div class="h-full flex flex-column">
+            <app-upload-document></app-upload-document>
+            <app-annotate-document [concept]="concept"></app-annotate-document>
+        </div>
+    </div>
+    <div class="flex-1">
+        <bok-visualization [(selectedConcept)]="concept" [showDescription]="false"> </bok-visualization>
+    </div>
+</div>

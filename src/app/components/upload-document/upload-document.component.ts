@@ -19,7 +19,6 @@ export class UploadDocumentComponent implements OnDestroy {
   pageCount: number = 0;
   bokKeywordsRDFstring?: string = '';
   showProgressBar: boolean = false;
-  description: string = '';
   message: string = '';
   bokRelations: string[] = [];
 
@@ -36,10 +35,10 @@ export class UploadDocumentComponent implements OnDestroy {
   async onFileSelected(event: Event) {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
+      this.sharedService.triggerClear()
       const file = input.files[0];
       this.fileName = file.name.slice(0, -4);
       this.fileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB'; // store size in mb
-      this.pageCount = 4;
       this.showProgressBar = true;
       this.progress = 0; // Reset progress
 
@@ -80,10 +79,6 @@ export class UploadDocumentComponent implements OnDestroy {
 
   // function extracts the description and BoK relations
   getBoKRelationsArray(subject: string) {
-    const regex = /description\$\s*(.*)/;
-    const match = subject.match(regex);
-    this.description = match ? match[1].trim() : '';
-
     if (subject.length != 0 && typeof subject === 'string') {
       this.bokRelations = [...subject.matchAll(/eo4geo:([\w\d-]+)/g)].map(
         (match) => match[1]
@@ -128,6 +123,7 @@ export class UploadDocumentComponent implements OnDestroy {
     this.sharedService.setIsPdfAvailable(false);
     this.pageCount = 0;
     this.showProgressBar = false;
+    this.bokRelations = []
   }
 
   // updates the service with Bok keywords
@@ -139,14 +135,13 @@ export class UploadDocumentComponent implements OnDestroy {
     this.subscription.unsubscribe(); // Unsubscribe to avoid memory leaks
   }
 
-  // creates a RDF formatted string for BoK keywords and description
+  // creates a RDF formatted string for BoK keywords
   configureMetaData(relations: string[]) {
-    const title = this.fileName;
     const bokRelations = relations.map(
       (relation) => 'dc:relation eo4geo:' + relation
     );
     const bokRelationsString = bokRelations.join('; ');
-    const rdfPrefix = `@prefix dc: <http://purl.org/dc/terms/> . @prefix eo4geo: <http://bok.eo4geo.eu/> . <> dc:title "${title}"; ${bokRelationsString} . description$ ${this.description}`;
+    const rdfPrefix = `@prefix dc: <http://purl.org/dc/terms/> . @prefix eo4geo: <http://bok.eo4geo.eu/> . <> ${bokRelationsString} .`;
 
     return rdfPrefix;
   }

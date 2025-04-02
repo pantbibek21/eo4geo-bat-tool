@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { HeaderComponent, FooterComponent } from '@eo4geo/ngx-bok-utils';
 import { MenuItem } from 'primeng/api';
-import { RouterOutlet } from '@angular/router';
+import { Router, RouterOutlet } from '@angular/router';
 
 @Component({
   standalone: true,
@@ -76,4 +76,14 @@ export class AppComponent {
       ],
     },
   ];
+
+  constructor(private router: Router) {}
+
+  redirectToProfile() {
+    this.router.navigate(['profile'], { replaceUrl: true });
+  }
+
+  redirectToOrganizations() {
+    this.router.navigate(['organizations'], { replaceUrl: true });
+  }
 }

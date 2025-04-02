@@ -1,21 +1,20 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SharedService } from '../../services/shared.service';
 import {
-  BokComponent,
   BokInformationService,
 } from '@eo4geo/ngx-bok-visualization';
 import { map, Observable } from 'rxjs';
 
 @Component({
   selector: 'app-annotate-document',
-  imports: [CommonModule, BokComponent],
+  imports: [CommonModule],
   templateUrl: './annotate-document.component.html',
   styleUrl: './annotate-document.component.css',
 })
 export class AnnotateDocumentComponent {
   bokConcepts: string[] = [];
-  concept: string = 'GIST';
+  @Input() concept: string = 'GIST';
   conceptName: string = '';
   conceptColor: string = '';
   message: string = '';

@@ -22,7 +22,7 @@
 
       <div class="progress-container">
         <p *ngIf="fileName" id="progress-bar">
-          {{ fileName }} ({{ fileSize }})
+          {{ fileName }}.pdf ({{ fileSize }})
         </p>
 
         <p *ngIf="pageCount">Page Count: {{ pageCount }}</p>
@@ -34,44 +34,15 @@
         </div>
       </div>
     </div>
+    <div class="btn-controls">
+      <button
+        class="p-button download-btn custom-button"
+        (click)="onDownload()"
+      >
+        Download
+      </button>
 
-    <div class="general-section">
-      <h2 class="section-heading">General Information</h2>
-
-      <div class="form-field">
-        <label for="file-name">Title</label>
-        <input
-          id="file-name"
-          type="text"
-          placeholder="No file selected so far.."
-          class="p-inputtext w-21rem custom-input"
-          [(ngModel)]="fileName"
-        />
-      </div>
-
-      <div class="form-field">
-        <label for="description">Description</label>
-        <textarea
-          id="description"
-          type="text"
-          placeholder=""
-          rows="10"
-          class="p-inputtext h-6rem custom-input"
-          [(ngModel)]="description"
-          placeholder="Write PDF description..."
-        ></textarea>
-      </div>
-
-      <div class="btn-controls">
-        <button
-          class="p-button download-btn custom-button"
-          (click)="onDownload()"
-        >
-          Download
-        </button>
-
-        <p *ngIf="message" class="error-msg">{{ message }}</p>
-      </div>
+      <p *ngIf="message" class="error-msg">{{ message }}</p>
     </div>
   </div>
 </section>
