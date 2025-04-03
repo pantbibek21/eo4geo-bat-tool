@@ -30,16 +30,3 @@ body {
     black 10%
   );
 }
-
-.custom-input {
-  --p-inputtext-focus-border-color: var(--hover-color);
-  --p-inputtext-hover-border-color: var(--hover-color);
-}
-
-@media screen and (max-width: 456px) {
-  .custom-button {
-    width: 100%;
-    margin-bottom: 12px;
-    text-align: center;
-  }
-}

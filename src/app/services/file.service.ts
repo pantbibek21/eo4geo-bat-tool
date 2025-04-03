@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { PDFDocument } from 'pdf-lib';
-import { Subject, BehaviorSubject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',

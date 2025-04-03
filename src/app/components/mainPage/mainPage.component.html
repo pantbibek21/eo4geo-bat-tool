@@ -1,13 +1,15 @@
-<div class="flex flex-wrap">
-    <div class="flex-1 p-3 overflow-auto min-w-screen lg:min-w-0 max-h-full lg:max-h-screen">
+<div class="flex flex-wrap mx-2">
+    <div class="flex-1 p-4 overflow-auto min-w-screen lg:min-w-0 max-h-full">
         <div class="h-full flex flex-column">
+            <app-document-information *ngIf="logged" (fileNameChange)="updateSaveName($event)" (descriptionChange)="updateSaveDescription($event)"></app-document-information>
+            <p-divider *ngIf="logged" />
             <app-upload-document></app-upload-document>
+            <p-divider />
             <app-annotate-document [concept]="concept"></app-annotate-document>
-            <div class="btn-controls">
-                <button  class="p-button download-btn custom-button" (click)="onDownload()">
-                    Download
-                </button>
-                <p *ngIf="message" class="error-msg">{{ message }}</p>
+            <p-divider />
+            <div class="flex flex-wrap gap-4">
+                <p-button  class="custom-button" (click)="onDownload()" [disabled]="pdfDoc == null">Download</p-button>
+                <p-button *ngIf="logged" class="custom-button" (click)="onDownload()" [disabled]="pdfDoc == null">Save</p-button>
             </div>
         </div>
     </div>

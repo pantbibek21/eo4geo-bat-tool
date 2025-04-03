@@ -6,6 +6,10 @@ import { PDFDocument } from 'pdf-lib';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { FileService } from '../../services/file.service';
+import { DividerModule } from 'primeng/divider';
+import { ButtonModule } from 'primeng/button';
+import { SessionService } from '../../services/session.service';
+import { DocumentInformationComponent } from "../document-information/document-information.component";
 
 @Component({
   standalone: true,
@@ -16,22 +20,29 @@ import { FileService } from '../../services/file.service';
     UploadDocumentComponent,
     AnnotateDocumentComponent,
     BokComponent,
-    CommonModule
-  ],
+    CommonModule,
+    DividerModule,
+    DocumentInformationComponent,
+    ButtonModule
+],
 })
 export class MainPageComponent implements OnInit, OnDestroy {
   concept: string = 'GIST'
-  message: string = '';
+  logged: boolean = false;
+  pdfDoc: PDFDocument | null = null;
+
+  saveName: string = '';
+  saveDescription: string = '';
 
   private bokRelations: string[] = [];
-  private pdfDoc: PDFDocument | null = null;
   private fileName: string = '';
 
   private bokRelationsSubscription!: Subscription;
   private pdfDocSubscription!: Subscription;
   private fileNameSubscription!: Subscription;
+  private loggedSubscription!: Subscription;
 
-  constructor(private fileService: FileService) {}
+  constructor(private fileService: FileService, private sessionService: SessionService) {}
 
   ngOnInit(): void {
     this.bokRelationsSubscription = this.fileService.bokConcept$.subscribe(concepts => {
@@ -43,12 +54,24 @@ export class MainPageComponent implements OnInit, OnDestroy {
     this.fileNameSubscription = this.fileService.fileName$.subscribe(name => {
       this.fileName = name;
     });
+    this.loggedSubscription = this.sessionService.logged$.subscribe(newValue => {
+      this.logged = newValue;
+    })
   }
 
   ngOnDestroy() {
-    this.pdfDocSubscription.unsubscribe()
-    this.bokRelationsSubscription.unsubscribe()
-    this.fileNameSubscription.unsubscribe()
+    this.pdfDocSubscription.unsubscribe();
+    this.bokRelationsSubscription.unsubscribe();
+    this.fileNameSubscription.unsubscribe();
+    this.loggedSubscription.unsubscribe();
+  }
+
+  updateSaveName(newValue: string) {
+    this.saveName = newValue;
+  }
+
+  updateSaveDescription(newValue: string) {
+    this.saveDescription = newValue;
   }
 
   async onDownload() {
@@ -68,12 +91,6 @@ export class MainPageComponent implements OnInit, OnDestroy {
       link.href = URL.createObjectURL(blob);
       link.download = this.fileName;
       link.click();
-    } else {
-      this.message = 'No file available to download!';
-
-      setTimeout(() => {
-        this.message = '';
-      }, 3000);
     }
   }
 

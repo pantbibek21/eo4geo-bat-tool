@@ -3,10 +3,13 @@ import { CommonModule } from '@angular/common';
 import { BokInformationService } from '@eo4geo/ngx-bok-visualization';
 import { map, Observable, Subscription, take } from 'rxjs';
 import { FileService } from '../../services/file.service';
+import { ButtonModule } from 'primeng/button';
+import { ChipModule } from 'primeng/chip';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-annotate-document',
-  imports: [CommonModule],
+  imports: [CommonModule, ButtonModule, ChipModule, TooltipModule],
   templateUrl: './annotate-document.component.html',
   styleUrl: './annotate-document.component.css',
 })

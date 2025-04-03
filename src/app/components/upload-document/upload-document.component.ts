@@ -1,12 +1,14 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { PDFDocument } from 'pdf-lib';
 import { FileService } from '../../services/file.service';
+import { FileSelectEvent, FileUploadModule } from 'primeng/fileupload';
+import { PanelModule } from 'primeng/panel';
+import { ProgressBarModule } from 'primeng/progressbar';
 
 @Component({
   selector: 'app-upload-document',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FileUploadModule, PanelModule, ProgressBarModule],
   templateUrl: './upload-document.component.html',
   styleUrl: './upload-document.component.css',
 })
@@ -19,17 +21,17 @@ export class UploadDocumentComponent {
   bokKeywordsRDFstring?: string = '';
   showProgressBar: boolean = false;
 
+  pdfDoc: PDFDocument | null = null;
   private bokRelations: string[] = [];
-  private pdfDoc: PDFDocument | null = null; // Store the PDF globally
 
   constructor(private fileService: FileService) {}
 
   // triggers when file is loaded
-  async onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
+  async onFileSelected(input: FileSelectEvent) {
     if (input.files && input.files.length > 0) {
       this.onClear()
       const file = input.files[0];
+      if (file.type != 'application/pdf') return
       this.fileName = file.name.slice(0, -4);
       this.fileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB'; // store size in mb
       this.showProgressBar = true;
@@ -77,6 +79,7 @@ export class UploadDocumentComponent {
 
   // clears the inputs fields and progress bar
   onClear() {
+    this.pdfDoc = null;
     this.progress = 0;
     this.fileName = '';
     this.fileSize = '';
