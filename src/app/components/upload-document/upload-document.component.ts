@@ -1,17 +1,18 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
 import { PDFDocument } from 'pdf-lib';
-import { SharedService } from '../../services/shared.service';
-import { Subscription } from 'rxjs';
+import { FileService } from '../../services/file.service';
+import { FileSelectEvent, FileUploadModule } from 'primeng/fileupload';
+import { PanelModule } from 'primeng/panel';
+import { ProgressBarModule } from 'primeng/progressbar';
 
 @Component({
   selector: 'app-upload-document',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FileUploadModule, PanelModule, ProgressBarModule],
   templateUrl: './upload-document.component.html',
   styleUrl: './upload-document.component.css',
 })
-export class UploadDocumentComponent implements OnDestroy {
+export class UploadDocumentComponent {
   // define the variables
   progress: number = 0;
   fileName: string = '';
@@ -19,32 +20,22 @@ export class UploadDocumentComponent implements OnDestroy {
   pageCount: number = 0;
   bokKeywordsRDFstring?: string = '';
   showProgressBar: boolean = false;
-  description: string = '';
-  message: string = '';
-  bokRelations: string[] = [];
 
-  private pdfDoc: PDFDocument | null = null; // Store the PDF globally
-  private subscription: Subscription = new Subscription();
+  pdfDoc: PDFDocument | null = null;
+  private bokRelations: string[] = [];
 
-  constructor(private sharedService: SharedService) {
-    this.subscription = this.sharedService.clear$.subscribe(() => {
-      this.onClear();
-    });
-  }
+  constructor(private fileService: FileService) {}
 
   // triggers when file is loaded
-  async onFileSelected(event: Event) {
-    const input = event.target as HTMLInputElement;
+  async onFileSelected(input: FileSelectEvent) {
     if (input.files && input.files.length > 0) {
+      this.onClear()
       const file = input.files[0];
+      if (file.type != 'application/pdf') return
       this.fileName = file.name.slice(0, -4);
       this.fileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB'; // store size in mb
-      this.pageCount = 4;
       this.showProgressBar = true;
       this.progress = 0; // Reset progress
-
-      // update the service
-      this.sharedService.setIsPdfAvailable(true);
 
       // create a reader object
       const reader = new FileReader();
@@ -64,26 +55,21 @@ export class UploadDocumentComponent implements OnDestroy {
       reader.readAsArrayBuffer(file);
 
       const arrayBuffer = await file.arrayBuffer();
-      this.pdfDoc = await PDFDocument.load(arrayBuffer);
+      this.pdfDoc = await PDFDocument.load(arrayBuffer)
       this.pageCount = this.pdfDoc.getPageCount();
 
       // subject key stores our RDF formatted string holding BoK relations and description together
       this.bokKeywordsRDFstring = this.pdfDoc.getSubject() || '';
-
-      // takes the subject; extracts the BoK relations; and updates bokRelations array
       this.getBoKRelationsArray(this.bokKeywordsRDFstring);
 
-      // updates BoK keywords in service to be globally avaiable to be used in annotation component
-      this.updateBoKConcept(this.bokRelations);
+      this.fileService.setPdfFile(this.pdfDoc)
+      this.fileService.setFileName(this.fileName)
+      this.fileService.setBokConcept(this.bokRelations);
     }
   }
 
   // function extracts the description and BoK relations
   getBoKRelationsArray(subject: string) {
-    const regex = /description\$\s*(.*)/;
-    const match = subject.match(regex);
-    this.description = match ? match[1].trim() : '';
-
     if (subject.length != 0 && typeof subject === 'string') {
       this.bokRelations = [...subject.matchAll(/eo4geo:([\w\d-]+)/g)].map(
         (match) => match[1]
@@ -91,63 +77,14 @@ export class UploadDocumentComponent implements OnDestroy {
     }
   }
 
-  async onDownload() {
-    // check if file is available; if available, download, otherwise, set error message telling no file available to downlaod!
-    if (this.sharedService.getIsPdfAvailable() && this.pdfDoc) {
-      // fetch the BoK relations and set the metadata configuring the subject in RDF format!
-      const latestBoKRelations = this.sharedService.getBokConcept();
-
-      // function returns the configured string in RDF format
-      const relationsMetadata = this.configureMetaData(latestBoKRelations);
-      this.pdfDoc?.setTitle(this.fileName);
-
-      // stores the RDF format string holding BoK keys and relations
-      this.pdfDoc?.setSubject(relationsMetadata);
-      const pdfBytes = await this.pdfDoc.save();
-
-      // set title and download pdf
-      const blob = new Blob([pdfBytes], { type: 'application/pdf' });
-      const link = document.createElement('a');
-      link.href = URL.createObjectURL(blob);
-      link.download = this.fileName;
-      link.click();
-    } else {
-      this.message = 'No file available to download!';
-
-      setTimeout(() => {
-        this.message = '';
-      }, 3000);
-    }
-  }
-
   // clears the inputs fields and progress bar
   onClear() {
+    this.pdfDoc = null;
+    this.progress = 0;
     this.fileName = '';
     this.fileSize = '';
-    this.bokKeywordsRDFstring = '';
-    this.sharedService.setIsPdfAvailable(false);
     this.pageCount = 0;
-    this.showProgressBar = false;
-  }
-
-  // updates the service with Bok keywords
-  updateBoKConcept(data: string[]) {
-    this.sharedService.setBokConcept(data);
-  }
-
-  ngOnDestroy() {
-    this.subscription.unsubscribe(); // Unsubscribe to avoid memory leaks
-  }
-
-  // creates a RDF formatted string for BoK keywords and description
-  configureMetaData(relations: string[]) {
-    const title = this.fileName;
-    const bokRelations = relations.map(
-      (relation) => 'dc:relation eo4geo:' + relation
-    );
-    const bokRelationsString = bokRelations.join('; ');
-    const rdfPrefix = `@prefix dc: <http://purl.org/dc/terms/> . @prefix eo4geo: <http://bok.eo4geo.eu/> . <> dc:title "${title}"; ${bokRelationsString} . description$ ${this.description}`;
-
-    return rdfPrefix;
+    this.bokKeywordsRDFstring = '';
+    this.bokRelations = [];
   }
 }

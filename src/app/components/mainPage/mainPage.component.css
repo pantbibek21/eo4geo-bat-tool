@@ -1,0 +1,21 @@
+.custom-acordion {
+    --p-accordion-header-color: color-mix(in srgb, var(--primary-color) 60%, rgba(255, 255, 255, 0) 40%);
+    --p-accordion-header-hover-color: var(--hover-color);
+    --p-accordion-header-active-color: var(--primary-color);
+    --p-accordion-content-color: var(--primary-color);
+}
+
+.responsive-wrapper {
+    max-width: calc(100vh * 0.85);
+}
+
+@media (max-width: 991px) {
+    .responsive-wrapper {
+        max-width: 100%;
+    }
+}
+
+.max-w-50rem {
+    max-width: 50rem;
+}
+

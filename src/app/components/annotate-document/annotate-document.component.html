@@ -1,41 +1,31 @@
-<section class="document-section">
-  <div class="section-wrapper">
-    <h2 class="section-heading">Knowledge Annotated</h2>
-    <ul class="annotation-list">
-      <li
-        *ngFor="let concept of bokConcepts"
-        (click)="deleteBokConcept(concept)"
-        [ngStyle]="{
-          'background-color': getBackgroundColor(concept) | async
-        }"
-      >
-        {{ concept + " " + getConceptName(concept) }}
-        <span class="pi pi-times-circle cross-icon"></span>
-      </li>
-      <p *ngIf="bokConcepts.length === 0">
-        Search and add knowledge to start annotating the PDF
-      </p>
-    </ul>
+<div>
+  
+  <p class="m-0" *ngIf="bokConcepts.length === 0">
+    Search and add knowledge to start annotating the PDF
+  </p>
 
-    <div class="btn-controls">
-      <button
-        [ngClass]="{ 'disable-btn': !isPdfAvailable }"
-        class="p-button add-btn custom-button"
-        (click)="addAnnotation()"
-        [disabled]="!isPdfAvailable"
-      >
-        Add annotation
-      </button>
-      <button
-        [ngClass]="{ 'disable-btn': !isPdfAvailable }"
-        class="p-button clear-btn custom-button"
-        (click)="onClear()"
-        [disabled]="!isPdfAvailable"
-      >
-        Clear all
-      </button>
-      <p *ngIf="message" style="color: var(--danger-color)">{{ message }}</p>
-    </div>
+  <div class="flex align-items-start gap-2 mt-2 mb-4 flex-wrap">
+    <ng-container *ngFor="let concept of bokConcepts">
+      <p-chip [label]="'[' + concept + '] ' + (getConceptName(concept) | async)" [removable]="true" [style.background]="getBackgroundColor(concept) | async" (onRemove)="deleteBokConcept(concept)" 
+      [style.color]="'var(--primary-color)'" [style]="{'--p-chip-remove-icon-color':'var(--primary-color)'}" class="lg:white-space-nowrap" />
+    </ng-container>
   </div>
-</section>
-<bok-visualization [(selectedConcept)]="concept"> </bok-visualization>
+
+  <div class="flex flex-wrap gap-2">
+    <p-button
+      class="custom-button"
+      (click)="addAnnotation()"
+      [disabled]="!isPdfAvailable"
+    >
+      Add annotation
+    </p-button>
+    <p-button
+      class="custom-button"
+      (click)="onClear()"
+      [disabled]="!isPdfAvailable"
+    >
+      Clear all
+    </p-button>
+  </div>
+  <p *ngIf="message" style="color: var(--danger-color)">{{ message }}</p>
+</div>
