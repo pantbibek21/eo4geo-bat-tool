@@ -1,5 +1,6 @@
 <div class="flex flex-wrap mx-2 lg:mx-7 max-h-full justify-content-between">
     <div class="flex-1 px-4 py-2 max-w-50rem min-w-full lg:min-w-0">
+        <h2 class="text-center">New Annotation</h2>
         <div class="h-full flex flex-column">
             <p-accordion [value]="['0', '1', '2']" [multiple]="true" class="custom-acordion">
                 <p-accordion-panel value="0">
@@ -19,7 +20,7 @@
                 <p-accordion-panel value="2">
                     <p-accordion-header>Document Information</p-accordion-header>
                     <p-accordion-content>
-                        <app-document-information (fileNameChange)="updateSaveName($event)" (descriptionChange)="updateSaveDescription($event)" [logged]="logged"></app-document-information>
+                        <app-document-information></app-document-information>
                     </p-accordion-content>
                 </p-accordion-panel>
             </p-accordion>
@@ -30,6 +31,7 @@
             </div>
         </div>
     </div>
+    <p-divider class="hidden lg:flex my-3" layout="vertical" />
     <div class="flex-1 responsive-wrapper lg:mx-auto">
         <bok-visualization [(selectedConcept)]="concept" [showDescription]="false"> </bok-visualization>
     </div>

@@ -1,5 +1,4 @@
-<div>
-  
+<div class="my-2">
   <p class="m-0" *ngIf="bokConcepts.length === 0">
     Search and add knowledge to start annotating the PDF
   </p>
@@ -22,10 +21,11 @@
     <p-button
       class="custom-button"
       (click)="onClear()"
-      [disabled]="!isPdfAvailable"
+      [disabled]="!isPdfAvailable || bokConcepts.length == 0"
     >
       Clear all
     </p-button>
   </div>
+  
   <p *ngIf="message" style="color: var(--danger-color)">{{ message }}</p>
 </div>

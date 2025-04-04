@@ -1,10 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PDFDocument } from 'pdf-lib';
 import { FileService } from '../../services/file.service';
 import { FileSelectEvent, FileUploadModule } from 'primeng/fileupload';
 import { PanelModule } from 'primeng/panel';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { Subscription, timer } from 'rxjs';
 
 @Component({
   selector: 'app-upload-document',
@@ -12,7 +13,7 @@ import { ProgressBarModule } from 'primeng/progressbar';
   templateUrl: './upload-document.component.html',
   styleUrl: './upload-document.component.css',
 })
-export class UploadDocumentComponent {
+export class UploadDocumentComponent implements OnDestroy {
   // define the variables
   progress: number = 0;
   fileName: string = '';
@@ -24,14 +25,21 @@ export class UploadDocumentComponent {
   pdfDoc: PDFDocument | null = null;
   private bokRelations: string[] = [];
 
+  private timerSubscription: Subscription | null = null;
+
   constructor(private fileService: FileService) {}
+  ngOnDestroy(): void {
+    if (this.timerSubscription) {
+      this.timerSubscription.unsubscribe();
+    }
+  }
 
   // triggers when file is loaded
   async onFileSelected(input: FileSelectEvent) {
     if (input.files && input.files.length > 0) {
-      this.onClear()
+      this.onClear();
       const file = input.files[0];
-      if (file.type != 'application/pdf') return
+      if (file.type != 'application/pdf') return;
       this.fileName = file.name.slice(0, -4);
       this.fileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB'; // store size in mb
       this.showProgressBar = true;
@@ -47,24 +55,27 @@ export class UploadDocumentComponent {
         }
       };
 
-      reader.onloadend = () => {
+      reader.onloadend = async () => {
         this.progress = 100; // Complete progress
+
+        const arrayBuffer = reader.result as ArrayBuffer;
+        this.pdfDoc = await PDFDocument.load(arrayBuffer)
+        this.pageCount = this.pdfDoc.getPageCount();
+
+        // subject key stores our RDF formatted string holding BoK relations and description together
+        this.bokKeywordsRDFstring = this.pdfDoc.getSubject() || '';
+        this.getBoKRelationsArray(this.bokKeywordsRDFstring);
+
+        this.timerSubscription = timer(1500).subscribe(() => {
+          this.showProgressBar = false;
+          this.fileService.setPdfFile(this.pdfDoc!)
+          this.fileService.setFileName(this.fileName)
+          this.fileService.setBokConcept(this.bokRelations);
+        });
       };
 
       // start reading the file
       reader.readAsArrayBuffer(file);
-
-      const arrayBuffer = await file.arrayBuffer();
-      this.pdfDoc = await PDFDocument.load(arrayBuffer)
-      this.pageCount = this.pdfDoc.getPageCount();
-
-      // subject key stores our RDF formatted string holding BoK relations and description together
-      this.bokKeywordsRDFstring = this.pdfDoc.getSubject() || '';
-      this.getBoKRelationsArray(this.bokKeywordsRDFstring);
-
-      this.fileService.setPdfFile(this.pdfDoc)
-      this.fileService.setFileName(this.fileName)
-      this.fileService.setBokConcept(this.bokRelations);
     }
   }
 
@@ -80,11 +91,15 @@ export class UploadDocumentComponent {
   // clears the inputs fields and progress bar
   onClear() {
     this.pdfDoc = null;
+    this.showProgressBar = false;
     this.progress = 0;
     this.fileName = '';
     this.fileSize = '';
     this.pageCount = 0;
     this.bokKeywordsRDFstring = '';
     this.bokRelations = [];
+    this.fileService.setPdfFile(this.pdfDoc!)
+    this.fileService.setFileName(this.fileName)
+    this.fileService.setBokConcept(this.bokRelations);
   }
 }

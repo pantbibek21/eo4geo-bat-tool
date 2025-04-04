@@ -8,6 +8,7 @@ import { Subscription } from 'rxjs';
 import { FileService } from '../../services/file.service';
 import { AccordionModule } from 'primeng/accordion';
 import { ButtonModule } from 'primeng/button';
+import { DividerModule } from 'primeng/divider';
 import { SessionService } from '../../services/session.service';
 import { DocumentInformationComponent } from "../document-information/document-information.component";
 
@@ -23,7 +24,8 @@ import { DocumentInformationComponent } from "../document-information/document-i
     CommonModule,
     AccordionModule,
     DocumentInformationComponent,
-    ButtonModule
+    ButtonModule,
+    DividerModule
 ],
 })
 export class MainPageComponent implements OnInit, OnDestroy {
@@ -64,14 +66,9 @@ export class MainPageComponent implements OnInit, OnDestroy {
     this.bokRelationsSubscription.unsubscribe();
     this.fileNameSubscription.unsubscribe();
     this.loggedSubscription.unsubscribe();
-  }
-
-  updateSaveName(newValue: string) {
-    this.saveName = newValue;
-  }
-
-  updateSaveDescription(newValue: string) {
-    this.saveDescription = newValue;
+    this.fileService.setPdfFile(null!)
+    this.fileService.setFileName('')
+    this.fileService.setBokConcept([]);
   }
 
   async onDownload() {
@@ -79,7 +76,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
     if (this.pdfDoc) {
       // function returns the configured string in RDF format
       const relationsMetadata = this.configureMetaData(this.bokRelations);
-      this.pdfDoc?.setTitle(this.fileName);
+      this.pdfDoc?.setTitle(this.fileName + '_annotated');
 
       // stores the RDF format string holding BoK keys and relations
       this.pdfDoc?.setSubject(relationsMetadata);
@@ -89,7 +86,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = this.fileName;
+      link.download = this.fileName + '_annotated';
       link.click();
     }
   }
