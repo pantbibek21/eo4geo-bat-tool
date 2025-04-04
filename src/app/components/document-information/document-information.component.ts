@@ -1,4 +1,4 @@
-import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
+import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputIconModule } from "primeng/inputicon";
@@ -20,6 +20,8 @@ export class DocumentInformationComponent {
   fileName: string = '';
   description: string = '';
   isPdfAvailable: boolean = false;
+
+  @Input() logged: boolean = false;
 
   @Output() fileNameChange: EventEmitter<string> = new EventEmitter();
   @Output() descriptionChange: EventEmitter<string> = new EventEmitter();

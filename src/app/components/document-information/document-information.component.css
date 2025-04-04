@@ -28,3 +28,8 @@
 .custom-textarea:focus {
   border-color: var(--hover-color) !important;
 }
+
+.custom-textarea:disabled:hover,
+.custom-textarea:disabled:active {
+  border-color: var(--p-inputtext-border-color) !important;
+}

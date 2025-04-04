@@ -1,19 +1,36 @@
-<div class="flex flex-wrap mx-2">
-    <div class="flex-1 p-4 overflow-auto min-w-screen lg:min-w-0 max-h-full">
+<div class="flex flex-wrap mx-2 lg:mx-7 max-h-full justify-content-between">
+    <div class="flex-1 px-4 py-2 max-w-50rem min-w-full lg:min-w-0">
         <div class="h-full flex flex-column">
-            <app-document-information *ngIf="logged" (fileNameChange)="updateSaveName($event)" (descriptionChange)="updateSaveDescription($event)"></app-document-information>
-            <p-divider *ngIf="logged" />
-            <app-upload-document></app-upload-document>
-            <p-divider />
-            <app-annotate-document [concept]="concept"></app-annotate-document>
-            <p-divider />
-            <div class="flex flex-wrap gap-4">
-                <p-button  class="custom-button" (click)="onDownload()" [disabled]="pdfDoc == null">Download</p-button>
-                <p-button *ngIf="logged" class="custom-button" (click)="onDownload()" [disabled]="pdfDoc == null">Save</p-button>
+            <p-accordion [value]="['0', '1', '2']" [multiple]="true" class="custom-acordion">
+                <p-accordion-panel value="0">
+                    <p-accordion-header>Upload File</p-accordion-header>
+                    <p-accordion-content>
+                        <app-upload-document></app-upload-document>
+                    </p-accordion-content>
+                </p-accordion-panel>
+            
+                <p-accordion-panel value="1">
+                    <p-accordion-header>Knowledge Annotated</p-accordion-header>
+                    <p-accordion-content>
+                        <app-annotate-document [concept]="concept"></app-annotate-document>
+                    </p-accordion-content>
+                </p-accordion-panel>
+            
+                <p-accordion-panel value="2">
+                    <p-accordion-header>Document Information</p-accordion-header>
+                    <p-accordion-content>
+                        <app-document-information (fileNameChange)="updateSaveName($event)" (descriptionChange)="updateSaveDescription($event)" [logged]="logged"></app-document-information>
+                    </p-accordion-content>
+                </p-accordion-panel>
+            </p-accordion>
+    
+            <div class="flex flex-wrap gap-4 m-3">
+                <p-button class="custom-button" (click)="onDownload()" [disabled]="pdfDoc == null">Download</p-button>
+                <p-button class="custom-button" (click)="onDownload()" [disabled]="pdfDoc == null || !logged">Save</p-button>
             </div>
         </div>
     </div>
-    <div class="flex-1">
+    <div class="flex-1 responsive-wrapper lg:mx-auto">
         <bok-visualization [(selectedConcept)]="concept" [showDescription]="false"> </bok-visualization>
     </div>
 </div>

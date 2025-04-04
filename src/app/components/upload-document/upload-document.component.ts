@@ -85,7 +85,6 @@ export class UploadDocumentComponent {
     this.fileSize = '';
     this.pageCount = 0;
     this.bokKeywordsRDFstring = '';
-    this.showProgressBar = false;
     this.bokRelations = [];
   }
 }

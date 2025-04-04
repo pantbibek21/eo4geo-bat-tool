@@ -6,7 +6,7 @@ import { PDFDocument } from 'pdf-lib';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { FileService } from '../../services/file.service';
-import { DividerModule } from 'primeng/divider';
+import { AccordionModule } from 'primeng/accordion';
 import { ButtonModule } from 'primeng/button';
 import { SessionService } from '../../services/session.service';
 import { DocumentInformationComponent } from "../document-information/document-information.component";
@@ -21,7 +21,7 @@ import { DocumentInformationComponent } from "../document-information/document-i
     AnnotateDocumentComponent,
     BokComponent,
     CommonModule,
-    DividerModule,
+    AccordionModule,
     DocumentInformationComponent,
     ButtonModule
 ],
