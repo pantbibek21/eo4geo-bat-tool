@@ -4,13 +4,17 @@ import { BokComponent } from '@eo4geo/ngx-bok-visualization';
 import { AnnotateDocumentComponent } from '../annotate-document/annotate-document.component';
 import { PDFDocument } from 'pdf-lib';
 import { CommonModule } from '@angular/common';
-import { Subscription } from 'rxjs';
+import { catchError, finalize, of, Subscription } from 'rxjs';
 import { FileService } from '../../services/file.service';
 import { AccordionModule } from 'primeng/accordion';
 import { ButtonModule } from 'primeng/button';
 import { DividerModule } from 'primeng/divider';
 import { SessionService } from '../../services/session.service';
 import { DocumentInformationComponent } from "../document-information/document-information.component";
+import { DocumentForm } from '../../model/documentForm';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from "primeng/api";
+import { DatabaseService } from '../../services/database.service';
 
 @Component({
   standalone: true,
@@ -25,16 +29,17 @@ import { DocumentInformationComponent } from "../document-information/document-i
     AccordionModule,
     DocumentInformationComponent,
     ButtonModule,
-    DividerModule
-],
+    DividerModule,
+    ToastModule
+  ],
+  providers: [MessageService]
 })
 export class MainPageComponent implements OnInit, OnDestroy {
   concept: string = 'GIST'
   logged: boolean = false;
   pdfDoc: PDFDocument | null = null;
 
-  saveName: string = '';
-  saveDescription: string = '';
+  formContent: DocumentForm | null = null;
 
   private bokRelations: string[] = [];
   private fileName: string = '';
@@ -44,7 +49,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
   private fileNameSubscription!: Subscription;
   private loggedSubscription!: Subscription;
 
-  constructor(private fileService: FileService, private sessionService: SessionService) {}
+  constructor(private fileService: FileService, private sessionService: SessionService, private databaseService: DatabaseService, private messageService: MessageService) {}
 
   ngOnInit(): void {
     this.bokRelationsSubscription = this.fileService.bokConcept$.subscribe(concepts => {
@@ -86,9 +91,49 @@ export class MainPageComponent implements OnInit, OnDestroy {
       const blob = new Blob([pdfBytes], { type: 'application/pdf' });
       const link = document.createElement('a');
       link.href = URL.createObjectURL(blob);
-      link.download = this.fileName + '_annotated';
+      link.style.display = 'none';
+      link.download = this.fileName + '_annotated.pdf';
       link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(link.href);
     }
+  }
+
+  onSave() {
+    if (this.pdfDoc && this.formContent) {
+      const relationsMetadata = this.configureMetaData(this.bokRelations);
+      this.pdfDoc?.setTitle(this.fileName + '_annotated');
+      this.pdfDoc?.setSubject(relationsMetadata);
+      let isSuccess = true;
+      this.databaseService.saveDocument(this.pdfDoc, this.formContent, this.bokRelations).pipe(
+        catchError((error) => {
+          isSuccess = false;
+          this.messageService.add({ 
+            severity: 'error', 
+            summary: 'Error', 
+            detail: error.message ?? 'Something went wrong. Try again later or contact the administrator.', 
+            life: 3000, 
+            closable: true 
+          });
+          return of(null);
+        }),
+        finalize(() => {
+          if (isSuccess) {
+            this.messageService.add({ 
+              severity: 'info', 
+              summary: 'Info', 
+              detail: `Document saved without problems.`,
+              life: 3000, 
+              closable: true 
+            }); 
+          }
+        })
+      ).subscribe();
+    }
+  }
+
+  updateFormContent(data: DocumentForm | null) {
+    this.formContent = data;
   }
 
   // creates a RDF formatted string for BoK keywords

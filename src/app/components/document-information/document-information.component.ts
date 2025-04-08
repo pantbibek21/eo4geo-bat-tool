@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnDestroy, Output } from '@angular/core';
+import { Component, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { InputIconModule } from "primeng/inputicon";
@@ -7,17 +7,22 @@ import { InputTextModule } from "primeng/inputtext";
 import { FloatLabelModule } from "primeng/floatlabel";
 import { TextareaModule } from 'primeng/textarea';
 import { SelectButtonModule } from 'primeng/selectbutton';
+import { SelectModule } from 'primeng/select';
 import { FileService } from '../../services/file.service';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription, take } from 'rxjs';
 import { SessionService } from '../../services/session.service';
+import { DatabaseService } from '../../services/database.service';
+import { DocumentForm } from '../../model/documentForm';
 
 @Component({
   selector: 'app-document-information',
-  imports: [CommonModule, FormsModule, InputIconModule, IconFieldModule, InputTextModule, FloatLabelModule, TextareaModule, SelectButtonModule],
+  imports: [CommonModule, FormsModule, InputIconModule, IconFieldModule, InputTextModule, FloatLabelModule, TextareaModule, SelectButtonModule, SelectModule],
   templateUrl: './document-information.component.html',
   styleUrl: './document-information.component.css',
 })
 export class DocumentInformationComponent {
+
+  @Output() formContent = new BehaviorSubject<DocumentForm | null>(null)
   
   fileName: string = '';
   description: string = '';
@@ -27,11 +32,18 @@ export class DocumentInformationComponent {
   stateOptions: any[] = [{ label: 'Public', value: true },{ label: 'Private', value: false }];
   publicFile: boolean = false;
 
+  organizations: {_id: string, name: string}[] = [];
+  selectedOrganization: {_id: string, name: string} | null = null;
+
+  organizationDivisions: Map<string, string[]> = new Map();
+  selectedDivision: string | null = null;
+
   private isPdfAvailableSuscription!: Subscription; 
   private fileNameSubscription!: Subscription;
   private loggedSubscription!: Subscription;
+  private organizationsSubscription!: Subscription;
 
-  constructor(private fileService: FileService, private sessionService: SessionService) {}
+  constructor(private fileService: FileService, private sessionService: SessionService, private databaseService: DatabaseService) {}
 
   ngOnInit() {
     this.isPdfAvailableSuscription = this.fileService.pdfFile$.subscribe(file => {
@@ -43,11 +55,39 @@ export class DocumentInformationComponent {
     this.loggedSubscription = this.sessionService.logged$.subscribe(newValue => {
       this.logged = newValue;
     })
+
+    this.organizationsSubscription = this.databaseService.getUserOrganizations().subscribe(orgs => {
+      this.organizations = orgs;
+      this.selectedOrganization = null
+      this.selectedDivision = null;
+      this.organizationDivisions = new Map();
+      this.organizations.forEach( (org, index) => {
+        this.databaseService.getOrganizationDivisions(org._id).pipe(take(1)).subscribe(divisions => {
+          this.organizationDivisions.set(org._id, divisions);
+        })
+      })
+    })
   }
 
   ngOnDestroy(): void {
     this.isPdfAvailableSuscription.unsubscribe();
     this.fileNameSubscription.unsubscribe();
     this.loggedSubscription.unsubscribe();
+    this.organizationsSubscription.unsubscribe();
+  }
+
+  updateDocumentForm() {
+    if (this.selectedOrganization == null || this.selectedDivision == null || this.fileName.trim() == '') {
+      this.formContent.next(null);
+      return;
+    }
+    const newFormInfo: DocumentForm = {
+      name: this.fileName,
+      description: this.description,
+      publicFile: this.publicFile,
+      organization: this.selectedOrganization,
+      division: this.selectedDivision
+    };
+    this.formContent.next(newFormInfo);
   }
 }
