@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { Auth, authState } from '@angular/fire/auth';
-import { collection, CollectionReference, doc, docData, DocumentReference, Firestore, serverTimestamp, setDoc } from '@angular/fire/firestore';
-import { getDownloadURL, ref, Storage, uploadBytes } from '@angular/fire/storage';
-import { catchError, concatMap, first, forkJoin, from, map, Observable, of, switchMap, take, throwError } from 'rxjs';
+import { collection, collectionData, CollectionReference, deleteDoc, doc, docData, DocumentReference, Firestore, query, serverTimestamp, setDoc, where } from '@angular/fire/firestore';
+import { deleteObject, getDownloadURL, ref, Storage, uploadBytes } from '@angular/fire/storage';
+import { catchError, concatMap, filter, first, forkJoin, from, map, Observable, of, switchMap, take, throwError } from 'rxjs';
 import { AnnotatedDocument } from '../model/annotatedDocument';
 import { PDFDocument } from 'pdf-lib';
 import { DocumentForm } from '../model/documentForm';
@@ -96,19 +96,44 @@ export class DatabaseService {
   }
 
   private saveDocumentMetadata(downloadUrl: string, data: DocumentForm, concepts: string[]): Observable<void> {
-    const conceptObservables = concepts.map(concept =>
+    const conceptObservables = concepts.length > 0 ? forkJoin(concepts.map(concept =>
       this.bokInfoService.getConceptName(concept).pipe(
         take(1),
         map(conceptName => `[${concept}] ${conceptName}`)
       )
-    );
-    return forkJoin(conceptObservables).pipe(
+    ))
+    : of([]);
+    return conceptObservables.pipe(
       concatMap(formatedConcepts => {
         const timestamp = serverTimestamp();
         const orgRef = doc(this.docsCollection);
         const newDocument: AnnotatedDocument = new AnnotatedDocument(orgRef.id, downloadUrl, this.userId, data.organization._id, data.organization.name, 'Other', 'Other', data.publicFile, data.name, data.name, data.description, formatedConcepts, 3, timestamp, timestamp, data.division);
         return from(setDoc(orgRef, newDocument.toPlainObject()));
       })
+    );
+  }
+
+  getAnnotatedDocuments(): Observable<AnnotatedDocument[]> {
+    return authState(this.auth).pipe(
+      switchMap(user => {
+        if (user) {
+          const selfDocsQuery = query(this.docsCollection, where('userId', '==', user.uid));
+          return collectionData(selfDocsQuery) as Observable<AnnotatedDocument[]>;
+        }
+        return of([]);
+      })
+    );
+  }
+
+  deleteDocument(document: AnnotatedDocument, deleteFile: boolean) {
+    const docReference = doc(this.docsCollection, document._id)
+    const path = `other/custom-${document.name}-${this.userId}`;
+    const fileRef = ref(this.storage, path);
+    return from(deleteDoc(docReference)).pipe(
+      concatMap( () => deleteFile ? deleteObject(fileRef) : of()),
+      catchError( () => throwError(
+        () => new Error('Something went wrong. Try to delete this file later or contact the administrator.')
+      ))
     );
   }
 

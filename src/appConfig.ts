@@ -8,13 +8,15 @@ import { provideRouter, Routes } from '@angular/router';
 import { AuthGuard, NotFoundPageComponent, OrganizationPageComponent, UserPageComponent } from '@eo4geo/ngx-bok-utils';
 import { environment } from './environments/environment';
 import { provideFirebaseApp, initializeApp } from '@angular/fire/app';
-import { getAuth, provideAuth } from '@angular/fire/auth';
+import { Auth, getAuth, provideAuth } from '@angular/fire/auth';
 import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { provideStorage, getStorage } from '@angular/fire/storage';
 import { MainPageComponent } from './app/components/mainPage/mainPage.component';
+import { ListPageComponent } from './app/components/listPage/listPage.component';
 
 const routes: Routes = [
     { path: '', component: MainPageComponent },
+    { path: 'list', component: ListPageComponent},
     { path: 'profile', component: UserPageComponent, canActivate: [AuthGuard]},
     { path: 'organizations', component: OrganizationPageComponent, canActivate: [AuthGuard]},
     { path: '**', component: NotFoundPageComponent}

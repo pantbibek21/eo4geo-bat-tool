@@ -39,3 +39,13 @@
 ::ng-deep .p-toast-close-button .p-button-label {
     font-size: 0;
 } 
+
+.docs-button {
+    --p-button-text-primary-color: var(--secondary-color);
+    --p-button-text-primary-hover-background: var(--p-button-text-secondary-hover-background);
+    --p-button-text-primary-active-background: var(--p-button-text-secondary-active-background);
+}
+
+.docs-button:hover {
+    --p-button-text-primary-color: var(--hover-color);
+}

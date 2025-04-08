@@ -1,7 +1,10 @@
 <p-toast class="custom-toast" position="bottom-right"/>
 <div class="flex flex-wrap mx-2 lg:mx-7 max-h-full justify-content-between">
     <div class="flex-1 px-4 py-2 max-w-50rem min-w-full lg:min-w-0">
-        <h2 class="text-center">New Annotation</h2>
+        <div class="flex justify-content-between">
+            <h2>New Annotation</h2>
+            <p-button class="docs-button m-3 mr-0" variant="text" label="My Documents" icon="pi pi-file" (click)="navigateToMyDocs()" [disabled]="!logged"></p-button>
+        </div>
         <div class="h-full flex flex-column">
             <p-accordion [value]="['0', '1', '2']" [multiple]="true" class="custom-acordion">
                 <p-accordion-panel value="0">

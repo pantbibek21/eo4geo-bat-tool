@@ -15,6 +15,7 @@ import { DocumentForm } from '../../model/documentForm';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from "primeng/api";
 import { DatabaseService } from '../../services/database.service';
+import { Router } from '@angular/router';
 
 @Component({
   standalone: true,
@@ -49,7 +50,8 @@ export class MainPageComponent implements OnInit, OnDestroy {
   private fileNameSubscription!: Subscription;
   private loggedSubscription!: Subscription;
 
-  constructor(private fileService: FileService, private sessionService: SessionService, private databaseService: DatabaseService, private messageService: MessageService) {}
+  constructor(private fileService: FileService, private sessionService: SessionService, private databaseService: DatabaseService, 
+              private messageService: MessageService, private router: Router) {}
 
   ngOnInit(): void {
     this.bokRelationsSubscription = this.fileService.bokConcept$.subscribe(concepts => {
@@ -145,5 +147,9 @@ export class MainPageComponent implements OnInit, OnDestroy {
     const rdfPrefix = `@prefix dc: <http://purl.org/dc/terms/> . @prefix eo4geo: <http://bok.eo4geo.eu/> . <> ${bokRelationsString} .`;
 
     return rdfPrefix;
+  }
+
+  navigateToMyDocs() {
+    this.router.navigate(['list'], { replaceUrl: true })
   }
 }
