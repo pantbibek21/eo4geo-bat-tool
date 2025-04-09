@@ -15,6 +15,7 @@ import { DatabaseService } from '../../services/database.service';
 import { DocumentForm } from '../../model/documentForm';
 
 @Component({
+  standalone: true,
   selector: 'app-document-information',
   imports: [CommonModule, FormsModule, InputIconModule, IconFieldModule, InputTextModule, FloatLabelModule, TextareaModule, SelectButtonModule, SelectModule],
   templateUrl: './document-information.component.html',
@@ -52,8 +53,8 @@ export class DocumentInformationComponent {
       this.fileName = formData?.name ?? '';
       this.description = formData?.description ?? '';
       this.publicFile = formData?.publicFile ?? false;
-      this.selectedOrganization = formData?.organization ?? null;
-      this.selectedDivision = formData?.division ?? '';
+      this.selectedOrganization = (formData?.organization._id == '' && formData?.organization.name == '') ? null : formData?.organization!;
+      this.selectedDivision = formData?.division ?? null;
     });
 
     this.loggedSubscription = this.sessionService.logged$.subscribe(newValue => this.logged = newValue);

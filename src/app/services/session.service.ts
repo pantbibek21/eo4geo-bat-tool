@@ -7,7 +7,7 @@ import { BehaviorSubject, Observable } from 'rxjs';
 })
 export class SessionService {
 
-    private auth = inject(Auth);
+    private auth;
     
     private logged: BehaviorSubject<boolean> = new BehaviorSubject(false);
     logged$: Observable<boolean> = this.logged.asObservable()
@@ -16,6 +16,7 @@ export class SessionService {
     userUid$: Observable<string> = this.userUid.asObservable();
 
     constructor() { 
+        this.auth = inject(Auth);
         authState(this.auth).subscribe(user => {
             this.logged.next(!!user);
             this.userUid.next(this.auth.currentUser?.uid ?? '')

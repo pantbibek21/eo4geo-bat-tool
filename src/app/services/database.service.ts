@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Auth, authState } from '@angular/fire/auth';
 import { collection, collectionData, CollectionReference, deleteDoc, doc, docData, DocumentReference, Firestore, query, serverTimestamp, setDoc, where } from '@angular/fire/firestore';
 import { deleteObject, getDownloadURL, ref, Storage, uploadBytes } from '@angular/fire/storage';
-import { catchError, concatMap, first, forkJoin, from, map, Observable, of, switchMap, take, throwError } from 'rxjs';
+import { catchError, concatMap, first, forkJoin, from, map, Observable, of, switchMap, take, tap, throwError } from 'rxjs';
 import { AnnotatedDocument } from '../model/annotatedDocument';
 import { PDFDocument } from 'pdf-lib';
 import { DocumentForm } from '../model/documentForm';
@@ -14,9 +14,9 @@ import { BokInformationService } from '@eo4geo/ngx-bok-visualization';
 })
 export class DatabaseService {
 
-  private auth = inject(Auth);
-  private db = inject(Firestore);
-  private storage = inject(Storage)
+  private auth;
+  private db;
+  private storage;
 
   private docsCollection: CollectionReference;
   private orgCollection: CollectionReference;
@@ -25,6 +25,10 @@ export class DatabaseService {
   private userId: string = '';
 
   constructor(private sessionService: SessionService, private bokInfoService: BokInformationService) { 
+    this.auth = inject(Auth);
+    this.db = inject(Firestore);
+    this.storage = inject(Storage)
+
     this.docsCollection = collection(this.db, 'Other');
     this.orgCollection = collection(this.db, 'Organizations');
     this.userCollection = collection(this.db, 'Users');
