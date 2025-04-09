@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { DialogModule } from 'primeng/dialog';
 import { ChipModule } from 'primeng/chip';
+import { DividerModule } from 'primeng/divider';
 import { BokInformationService } from '@eo4geo/ngx-bok-visualization';
 import { map, of, take } from 'rxjs';
 
@@ -10,12 +11,13 @@ import { map, of, take } from 'rxjs';
   selector: 'document-modal',
   templateUrl: './document-modal.component.html',
   styleUrls: ['./document-modal.component.css'],
-  imports: [ CommonModule, DialogModule, ChipModule ],
+  imports: [ CommonModule, DialogModule, ChipModule, DividerModule ],
 })
 export class DocumentModalComponent {
   @Input() visible: boolean = false;
   @Output() visibleChange: EventEmitter<boolean> = new EventEmitter(false);
   @Input() name: string = '';
+  @Input() description: string = '';
   @Input() concepts: string[] = []
 
   constructor(private bokInfoService: BokInformationService) {}

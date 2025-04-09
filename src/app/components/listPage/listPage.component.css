@@ -14,6 +14,10 @@
     --p-card-title-font-weight: 600;
 }
 
+.custom-card-padding {
+    --p-card-body-padding: 0.5rem;
+}
+
 .custom-toast {
     --p-toast-info-background: color-mix(in srgb, var(--secondary-color) 10%, rgba(255, 255, 255, 0.9) 90%);
     --p-toast-info-border-color: var(--secondary-color);

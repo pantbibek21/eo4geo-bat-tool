@@ -88,7 +88,7 @@ export class DatabaseService {
   }
 
   private uploadPdf(blob: Blob, fileName: string): Observable<string> {
-    const path = `other/custom-${fileName}-${this.userId}`;
+    const path = `other/custom-${fileName}-${this.userId}-${Date.now()}`;
     const storageRef = ref(this.storage, path);
     return from(uploadBytes(storageRef, blob)).pipe(
       concatMap(() => getDownloadURL(storageRef))
@@ -125,16 +125,36 @@ export class DatabaseService {
     );
   }
 
-  deleteDocument(document: AnnotatedDocument, deleteFile: boolean) {
+  deleteDocument(document: AnnotatedDocument) {
     const docReference = doc(this.docsCollection, document._id)
-    const path = `other/custom-${document.name}-${this.userId}`;
-    const fileRef = ref(this.storage, path);
+    const path = this.extractFirebasePath(document.url);
     return from(deleteDoc(docReference)).pipe(
-      concatMap( () => deleteFile ? deleteObject(fileRef) : of()),
+      concatMap( () => {
+        if (path) {
+          const fileRef = ref(this.storage, path);
+          return deleteObject(fileRef)
+        }
+        return of()
+      }),
       catchError( () => throwError(
         () => new Error('Something went wrong. Try to delete this file later or contact the administrator.')
       ))
     );
+  }
+
+  private extractFirebasePath(url: string): string | null {
+    try {
+      const match = url.match(/\/o\/(.+?)\?/);
+      if (!match || match.length < 2) return null;
+  
+      // decode twice in case of double encoding (like %2520 = %20 = space)
+      let path = decodeURIComponent(match[1]);
+      path = decodeURIComponent(path);
+  
+      return path;
+    } catch (error) {
+      return null;
+    }
   }
 
 }

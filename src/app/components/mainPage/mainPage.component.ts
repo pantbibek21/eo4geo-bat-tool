@@ -121,13 +121,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
         }),
         finalize(() => {
           if (isSuccess) {
-            this.messageService.add({ 
-              severity: 'info', 
-              summary: 'Info', 
-              detail: `Document saved without problems.`,
-              life: 3000, 
-              closable: true 
-            }); 
+            this.navigateToMyDocs()
           }
         })
       ).subscribe();

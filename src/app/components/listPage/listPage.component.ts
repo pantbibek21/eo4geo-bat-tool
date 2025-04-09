@@ -14,6 +14,7 @@ import { DatabaseService } from '../../services/database.service';
 import { AnnotatedDocument } from '../../model/annotatedDocument';
 import { catchError, finalize, of, Subscription } from 'rxjs';
 import { DocumentModalComponent } from "../document-modal/document-modal.component";
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   standalone: true,
@@ -32,11 +33,12 @@ export class ListPageComponent implements OnInit, OnDestroy {
 
   viewModal: boolean = false;
   modalName: string = '';
+  modalDescription: string = '';
   modalConcepts: string[] = []
 
   private documentsSubscription!: Subscription;
 
-  constructor(private databaseService: DatabaseService, private messageService: MessageService, private confirmationService: ConfirmationService) {}
+  constructor(private databaseService: DatabaseService, private messageService: MessageService, private confirmationService: ConfirmationService, private http: HttpClient) {}
 
   ngOnInit(): void {
     this.documentsSubscription = this.databaseService.getAnnotatedDocuments().subscribe(newDocuments => {
@@ -77,11 +79,10 @@ export class ListPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  // TODO - fix storage sync
   deleteDocument(document: AnnotatedDocument) {
-    const docPath = `other/custom-${document.name}-${document.userId}`;
-    const deleteFromStorage = this.documents.filter(doc => `other/custom-${doc.name}-${doc.userId}` == docPath).length == 1;
     let isSuccess = true;
-    this.databaseService.deleteDocument(document, deleteFromStorage).pipe(
+    this.databaseService.deleteDocument(document).pipe(
       catchError((error) => {
         isSuccess = false;
         this.messageService.add({ 
@@ -107,9 +108,27 @@ export class ListPageComponent implements OnInit, OnDestroy {
     ).subscribe();
   }
 
-  showModal(name: string, concepts: string[]) {
+  showModal(name: string, description: string, concepts: string[]) {
     this.modalConcepts = concepts;
     this.modalName = name;
+    this.modalDescription = description;
     this.viewModal = true;
+  }
+
+  downloadFile(url: string, name: string) {
+    this.http.get(url, { responseType: 'blob' }).subscribe(blob => {
+      const file = new Blob([blob], { type: 'application/pdf' });
+      const objectUrl = URL.createObjectURL(file);
+
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = `${name}_annotated.pdf`;
+      a.style.display = 'none';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      URL.revokeObjectURL(objectUrl);
+    });
   }
 }
