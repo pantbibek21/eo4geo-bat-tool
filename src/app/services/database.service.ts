@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Auth, authState } from '@angular/fire/auth';
 import { collection, collectionData, CollectionReference, deleteDoc, doc, docData, DocumentReference, Firestore, query, serverTimestamp, setDoc, where } from '@angular/fire/firestore';
 import { deleteObject, getDownloadURL, ref, Storage, uploadBytes } from '@angular/fire/storage';
-import { catchError, concatMap, filter, first, forkJoin, from, map, Observable, of, switchMap, take, throwError } from 'rxjs';
+import { catchError, concatMap, first, forkJoin, from, map, Observable, of, switchMap, take, throwError } from 'rxjs';
 import { AnnotatedDocument } from '../model/annotatedDocument';
 import { PDFDocument } from 'pdf-lib';
 import { DocumentForm } from '../model/documentForm';
@@ -155,6 +155,15 @@ export class DatabaseService {
     } catch (error) {
       return null;
     }
+  }
+
+  getDocument(id: string): Observable<AnnotatedDocument> {
+    const docReference = doc(this.docsCollection, id)
+    return docData(docReference) as Observable<AnnotatedDocument>
+  }
+
+  updateDocument(file: PDFDocument, data: DocumentForm, concepts: string[]): Observable<void> {
+    return of()
   }
 
 }

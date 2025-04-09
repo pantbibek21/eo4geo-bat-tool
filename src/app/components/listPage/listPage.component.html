@@ -19,9 +19,9 @@
                         <i class="p-1" [ngClass]="document.isPublic ? 'pi pi-lock-open' : 'pi pi-lock'"></i>
                     </div>
                     <div class="flex gap-1">
-                        <p-button class="flex pencil-button" variant="text" rounded="true" size="large" icon="pi pi-pencil"/>
-                        <p-button class="flex pencil-button" variant="text" rounded="true" size="large" icon="pi pi-download" (onClick)="downloadFile(document.url, document.name)"/>
-                        <p-button class="flex trash-button" variant="text" rounded="true" size="large" icon="pi pi-trash" (onClick)="deleteModal($event, document)"/>
+                        <p-button class="flex pencil-button" variant="text" rounded="true" size="large" icon="pi pi-pencil" (click)="editDocumentAnnotation(document._id)"/>
+                        <p-button class="flex pencil-button" variant="text" rounded="true" size="large" icon="pi pi-download" (click)="downloadFile(document.url, document.name)"/>
+                        <p-button class="flex trash-button" variant="text" rounded="true" size="large" icon="pi pi-trash" (click)="deleteModal($event, document)"/>
                     </div>
                 </div>
                 <div style="padding-left: 1.25rem; padding-right: 1.25rem; padding-top: 0.25rem;">

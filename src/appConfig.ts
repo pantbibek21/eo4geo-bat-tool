@@ -13,10 +13,12 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { provideStorage, getStorage } from '@angular/fire/storage';
 import { MainPageComponent } from './app/components/mainPage/mainPage.component';
 import { ListPageComponent } from './app/components/listPage/listPage.component';
+import { EditPageComponent } from './app/components/editPage/editPage.component';
 
 const routes: Routes = [
     { path: '', component: MainPageComponent },
-    { path: 'list', component: ListPageComponent},
+    { path: 'list', component: ListPageComponent, canActivate: [AuthGuard]},
+    { path: 'edit/:id', component: EditPageComponent, canActivate: [AuthGuard]},
     { path: 'profile', component: UserPageComponent, canActivate: [AuthGuard]},
     { path: 'organizations', component: OrganizationPageComponent, canActivate: [AuthGuard]},
     { path: '**', component: NotFoundPageComponent}

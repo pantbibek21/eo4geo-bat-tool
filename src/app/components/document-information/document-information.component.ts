@@ -39,27 +39,27 @@ export class DocumentInformationComponent {
   selectedDivision: string | null = null;
 
   private isPdfAvailableSuscription!: Subscription; 
-  private fileNameSubscription!: Subscription;
+  private formDataSubscription!: Subscription;
   private loggedSubscription!: Subscription;
   private organizationsSubscription!: Subscription;
 
   constructor(private fileService: FileService, private sessionService: SessionService, private databaseService: DatabaseService) {}
 
   ngOnInit() {
-    this.isPdfAvailableSuscription = this.fileService.pdfFile$.subscribe(file => {
-      this.isPdfAvailable = file != null;
+    this.isPdfAvailableSuscription = this.fileService.pdfFile$.subscribe(file => this.isPdfAvailable = file != null);
+
+    this.formDataSubscription = this.fileService.formData$.subscribe( formData => {
+      this.fileName = formData?.name ?? '';
+      this.description = formData?.description ?? '';
+      this.publicFile = formData?.publicFile ?? false;
+      this.selectedOrganization = formData?.organization ?? null;
+      this.selectedDivision = formData?.division ?? '';
     });
 
-    this.fileNameSubscription = this.fileService.fileName$.subscribe( newName => this.fileName = newName);
-
-    this.loggedSubscription = this.sessionService.logged$.subscribe(newValue => {
-      this.logged = newValue;
-    })
+    this.loggedSubscription = this.sessionService.logged$.subscribe(newValue => this.logged = newValue);
 
     this.organizationsSubscription = this.databaseService.getUserOrganizations().subscribe(orgs => {
       this.organizations = orgs;
-      this.selectedOrganization = null
-      this.selectedDivision = null;
       this.organizationDivisions = new Map();
       this.organizations.forEach( (org, index) => {
         this.databaseService.getOrganizationDivisions(org._id).pipe(take(1)).subscribe(divisions => {
@@ -71,7 +71,7 @@ export class DocumentInformationComponent {
 
   ngOnDestroy(): void {
     this.isPdfAvailableSuscription.unsubscribe();
-    this.fileNameSubscription.unsubscribe();
+    this.formDataSubscription.unsubscribe();
     this.loggedSubscription.unsubscribe();
     this.organizationsSubscription.unsubscribe();
   }

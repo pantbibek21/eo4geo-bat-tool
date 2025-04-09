@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { PDFDocument } from 'pdf-lib';
 import { BehaviorSubject } from 'rxjs';
+import { DocumentForm } from '../model/documentForm';
 
 @Injectable({
   providedIn: 'root',
@@ -8,11 +9,11 @@ import { BehaviorSubject } from 'rxjs';
 export class FileService {
   private bokConcepts = new BehaviorSubject<string[]>([]);
   private pdfFile = new BehaviorSubject<PDFDocument | null>(null);
-  private fileName = new BehaviorSubject<string>('');
+  private formData = new BehaviorSubject<DocumentForm | null>(null);
 
   bokConcept$ = this.bokConcepts.asObservable();
   pdfFile$ = this.pdfFile.asObservable()
-  fileName$ = this.fileName.asObservable()
+  formData$ = this.formData.asObservable()
 
   setBokConcept(value: string[]) {
     this.bokConcepts.next(value);
@@ -23,6 +24,25 @@ export class FileService {
   }
 
   setFileName(name: string) {
-    this.fileName.next(name);
+    let oldData: DocumentForm = this.formData.getValue() ?? 
+    {
+      name: '',
+      description: '',
+      publicFile: false,
+      organization: {_id: '', name: ''},
+      division: ''
+    };
+    oldData.name = name;
+    this.formData.next(oldData);
+  }
+
+  setDocumentForm(form: DocumentForm) {
+    this.formData.next(form);
+  }
+
+  resetValues() {
+    this.bokConcepts.next([]);
+    this.pdfFile.next(null);
+    this.formData.next(null);
   }
 }

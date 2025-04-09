@@ -41,6 +41,7 @@ export class AppComponent {
           icon: 'pi pi-pencil',
           style: { '--p-tieredmenu-item-color': 'var(--hover-color)' },
           iconStyle: { color: 'var(--hover-color)' },
+          command: () => this.router.navigate([''], { replaceUrl: true })
         },
         {
           label: 'BoK Matching Tool',

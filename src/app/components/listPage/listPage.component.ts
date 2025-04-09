@@ -15,6 +15,7 @@ import { AnnotatedDocument } from '../../model/annotatedDocument';
 import { catchError, finalize, of, Subscription } from 'rxjs';
 import { DocumentModalComponent } from "../document-modal/document-modal.component";
 import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 @Component({
   standalone: true,
@@ -38,7 +39,8 @@ export class ListPageComponent implements OnInit, OnDestroy {
 
   private documentsSubscription!: Subscription;
 
-  constructor(private databaseService: DatabaseService, private messageService: MessageService, private confirmationService: ConfirmationService, private http: HttpClient) {}
+  constructor(private databaseService: DatabaseService, private messageService: MessageService, 
+              private confirmationService: ConfirmationService, private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
     this.documentsSubscription = this.databaseService.getAnnotatedDocuments().subscribe(newDocuments => {
@@ -79,7 +81,6 @@ export class ListPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  // TODO - fix storage sync
   deleteDocument(document: AnnotatedDocument) {
     let isSuccess = true;
     this.databaseService.deleteDocument(document).pipe(
@@ -130,5 +131,9 @@ export class ListPageComponent implements OnInit, OnDestroy {
 
       URL.revokeObjectURL(objectUrl);
     });
+  }
+
+  editDocumentAnnotation(documentId: string) {
+    this.router.navigate(['edit/' + documentId], { replaceUrl: true })
   }
 }
