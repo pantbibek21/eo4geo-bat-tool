@@ -36,22 +36,20 @@ export class DatabaseService {
   }
 
   getUserOrganizationList(): Observable<{ _id: string, name: string }[]> {
-    return authState(this.auth).pipe(
-      switchMap(user => {
-        if (user) {
-          const docRef: DocumentReference = doc(this.userCollection, user.uid);
-          return docData(docRef) as Observable<{ organizations: string[] }>;
-        }
-        return of(null);
+    if (this.userId) {
+      const userRef: DocumentReference = doc(this.userCollection, this.userId);
+      return docData(userRef).pipe(
+        switchMap(userData => {
+          const organizations = userData?.['organizations'] as string[]
+          if (organizations && organizations.length > 0){
+            const orgRequests = organizations.map(orgId => this.getOrganizationName(orgId));
+            return forkJoin(orgRequests);
+          }
+          return of([]);
       }),
-      switchMap(userData => {
-        if (userData?.organizations && userData.organizations.length > 0) {
-          const orgRequests = userData.organizations.map(orgId => this.getOrganizationName(orgId));
-          return forkJoin(orgRequests);
-        }
-        return of([]);
-      })    
     );
+    }
+    return of([]);
   }
 
   private getOrganizationName(orgId: string): Observable<{ _id: string, name: string }> {

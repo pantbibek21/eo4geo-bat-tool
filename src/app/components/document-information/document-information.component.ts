@@ -59,7 +59,7 @@ export class DocumentInformationComponent {
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['formData']) {
-      this.selectedOrganization = (this.formData?.organization._id == '' && this.formData?.organization.name == '') ? null : this.formData?.organization!;
+      this.selectedOrganization = (this.formData?.organization._id == '' && this.formData?.organization.name == '') ? null : this.formData?.organization;
       this.selectedDivision = this.formData?.division ?? null;
     }
   }
