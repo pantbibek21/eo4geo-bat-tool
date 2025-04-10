@@ -9,10 +9,12 @@ export class FileService {
   private bokConcepts = new BehaviorSubject<string[]>([]);
   private pdfFile = new BehaviorSubject<PDFDocument | null>(null);
   private fileName = new BehaviorSubject<string>('');
+  private isModalVisible = new BehaviorSubject<boolean>(false);
 
   bokConcept$ = this.bokConcepts.asObservable();
-  pdfFile$ = this.pdfFile.asObservable()
-  fileName$ = this.fileName.asObservable()
+  pdfFile$ = this.pdfFile.asObservable();
+  fileName$ = this.fileName.asObservable();
+  isModalVisible$ = this.isModalVisible.asObservable();
 
   setBokConcept(value: string[]) {
     this.bokConcepts.next(value);
@@ -24,5 +26,9 @@ export class FileService {
 
   setFileName(name: string) {
     this.fileName.next(name);
+  }
+
+  setIsModalVisible(value: boolean) {
+    this.isModalVisible.next(value);
   }
 }

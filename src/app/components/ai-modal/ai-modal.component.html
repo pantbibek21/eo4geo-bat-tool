@@ -1,0 +1,68 @@
+<div class="modal-container">
+  <div class="form-container">
+    <div class="form-field">
+      <label for="annotation-number" style="margin-right: 8px"
+        >Enter annotation number</label
+      >
+      <input
+        [(ngModel)]="annotationNumber"
+        type="number"
+        id="annotation-number"
+        name="annotation-number"
+        required
+      />
+    </div>
+
+    <div class="form-field">
+      <fieldset>
+        <legend>Select annotation depth</legend>
+
+        <div>
+          <input
+            [(ngModel)]="annotationDepth"
+            type="radio"
+            id="high"
+            name="annotation-depth"
+            value="high"
+            required
+            checked
+          />
+          <label for="high">High</label>
+        </div>
+
+        <div>
+          <input
+            [(ngModel)]="annotationDepth"
+            type="radio"
+            id="medium"
+            name="annotation-depth"
+            value="medium"
+          />
+          <label for="medium">Medium</label>
+        </div>
+
+        <div>
+          <input
+            [(ngModel)]="annotationDepth"
+            type="radio"
+            id="low"
+            name="annotation-depth"
+            value="low"
+          />
+          <label for="low">Low</label>
+        </div>
+      </fieldset>
+    </div>
+
+    <div class="button-container">
+      <p-button
+        class="custom-button"
+        [disabled]="!annotationDepth"
+        (click)="generateRelation()"
+      >
+        Generate
+      </p-button>
+      <p-button class="custom-button" (click)="closeModal()"> Close </p-button>
+    </div>
+  </div>
+</div>

@@ -6,6 +6,7 @@ import { FileService } from '../../services/file.service';
 import { ButtonModule } from 'primeng/button';
 import { ChipModule } from 'primeng/chip';
 import { TooltipModule } from 'primeng/tooltip';
+import { ThemeUtils } from '@primeng/themes';
 
 @Component({
   selector: 'app-annotate-document',
@@ -18,25 +19,40 @@ export class AnnotateDocumentComponent implements OnInit, OnDestroy {
   bokConcepts: string[] = [];
   message: string = '';
   isPdfAvailable: boolean = false;
+  isModalVisible: boolean = false;
 
   private bokConceptsSubscription!: Subscription;
-  private isPdfAvailableSuscription!: Subscription; 
+  private isPdfAvailableSuscription!: Subscription;
+  private isModalVisibleSubscription!: Subscription;
 
-  constructor(private fileService: FileService, private bokInfoService: BokInformationService) {}
+  constructor(
+    private fileService: FileService,
+    private bokInfoService: BokInformationService
+  ) {}
 
   ngOnInit() {
-    this.bokConceptsSubscription = this.fileService.bokConcept$.subscribe(concepts => {
-      this.bokConcepts = concepts;
-    });
+    this.bokConceptsSubscription = this.fileService.bokConcept$.subscribe(
+      (concepts) => {
+        this.bokConcepts = concepts;
+      }
+    );
 
-    this.isPdfAvailableSuscription = this.fileService.pdfFile$.subscribe(file => {
-      this.isPdfAvailable = file != null;
-    });
+    this.isPdfAvailableSuscription = this.fileService.pdfFile$.subscribe(
+      (file) => {
+        this.isPdfAvailable = file != null;
+      }
+    );
+
+    this.isModalVisibleSubscription =
+      this.fileService.isModalVisible$.subscribe((value) => {
+        this.isModalVisible = value;
+      });
   }
 
   ngOnDestroy(): void {
     this.bokConceptsSubscription.unsubscribe();
     this.isPdfAvailableSuscription.unsubscribe();
+    this.isModalVisibleSubscription.unsubscribe();
   }
 
   onClear() {
@@ -44,7 +60,9 @@ export class AnnotateDocumentComponent implements OnInit, OnDestroy {
   }
 
   deleteBokConcept(concept: string) {
-    this.fileService.setBokConcept(this.bokConcepts.filter((item) => item !== concept));
+    this.fileService.setBokConcept(
+      this.bokConcepts.filter((item) => item !== concept)
+    );
   }
 
   addAnnotation() {
@@ -91,5 +109,10 @@ export class AnnotateDocumentComponent implements OnInit, OnDestroy {
     }
 
     return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+
+  renderModal() {
+    // set the flag to true that shows the modal with form
+    this.fileService.setIsModalVisible(true);
   }
 }
