@@ -1,13 +1,14 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, EventEmitter, OnDestroy, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { PDFDocument } from 'pdf-lib';
-import { FileService } from '../../services/file.service';
 import { FileSelectEvent, FileUploadModule } from 'primeng/fileupload';
 import { PanelModule } from 'primeng/panel';
 import { ProgressBarModule } from 'primeng/progressbar';
 import { Subscription, timer } from 'rxjs';
+import { DocumentForm } from '../../model/documentForm';
 
 @Component({
+  standalone: true,
   selector: 'app-upload-document',
   imports: [CommonModule, FileUploadModule, PanelModule, ProgressBarModule],
   templateUrl: './upload-document.component.html',
@@ -27,7 +28,11 @@ export class UploadDocumentComponent implements OnDestroy {
 
   private timerSubscription: Subscription | null = null;
 
-  constructor(private fileService: FileService) {}
+  @Output() pdfDocumentChange = new EventEmitter<PDFDocument>();
+  @Output() documentDataChange = new EventEmitter<DocumentForm>();
+  @Output() conceptsChange = new EventEmitter<string[]>();
+
+
   ngOnDestroy(): void {
     if (this.timerSubscription) {
       this.timerSubscription.unsubscribe();
@@ -68,9 +73,9 @@ export class UploadDocumentComponent implements OnDestroy {
 
         this.timerSubscription = timer(1500).subscribe(() => {
           this.showProgressBar = false;
-          this.fileService.setPdfFile(this.pdfDoc!)
-          this.fileService.setFileName(this.fileName)
-          this.fileService.setBokConcept(this.bokRelations);
+          this.pdfDocumentChange.emit(this.pdfDoc!)
+          this.documentDataChange.emit(new DocumentForm(this.fileName))
+          this.conceptsChange.emit(this.bokRelations);
         });
       };
 
@@ -98,8 +103,8 @@ export class UploadDocumentComponent implements OnDestroy {
     this.pageCount = 0;
     this.bokKeywordsRDFstring = '';
     this.bokRelations = [];
-    this.fileService.setPdfFile(this.pdfDoc!)
-    this.fileService.setFileName(this.fileName)
-    this.fileService.setBokConcept(this.bokRelations);
+    this.pdfDocumentChange.emit(this.pdfDoc!)
+    this.documentDataChange.emit(new DocumentForm())
+    this.conceptsChange.emit(this.bokRelations);
   }
 }

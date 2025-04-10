@@ -4,18 +4,18 @@
       <p-iconfield>
         <p-inputicon class="pi pi-pencil" />
         <input pInputText id="name" autocomplete="off" class="w-full custom-input" 
-              [(ngModel)]="fileName" [disabled]="!logged || !isPdfAvailable" (ngModelChange)="updateDocumentForm()"/>
+              [(ngModel)]="formData.name" [disabled]="!logged || !isPdfAvailable" (ngModelChange)="updateDocumentForm()"/>
         </p-iconfield>
         <label for="name">Name*</label>
     </p-floatlabel>
-    <p-selectbutton [options]="stateOptions" [(ngModel)]="publicFile" optionLabel="label" optionValue="value" 
+    <p-selectbutton [options]="stateOptions" [(ngModel)]="formData.publicFile" optionLabel="label" optionValue="value" 
                     [disabled]="!logged || !isPdfAvailable" (ngModelChange)="updateDocumentForm()"/>
   </div>
 
   <p-floatlabel variant="on" class="custom-floatlabel">
       <p-iconfield class="textarea-iconfield">
           <p-inputicon class="pi pi-align-justify"></p-inputicon>
-          <textarea id="description" rows="5" cols="30" pTextarea [(ngModel)]="description" style="resize: none;" 
+          <textarea id="description" rows="5" cols="30" pTextarea [(ngModel)]="formData.description" style="resize: none;" 
                     class="w-full custom-textarea" [disabled]="!logged || !isPdfAvailable" (ngModelChange)="updateDocumentForm()"></textarea>
       </p-iconfield>
       <label for="description">Description</label>

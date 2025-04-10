@@ -2,11 +2,10 @@ import { inject, Injectable } from '@angular/core';
 import { Auth, authState } from '@angular/fire/auth';
 import { collection, collectionData, CollectionReference, deleteDoc, doc, docData, DocumentReference, Firestore, query, serverTimestamp, setDoc, where } from '@angular/fire/firestore';
 import { deleteObject, getDownloadURL, ref, Storage, uploadBytes } from '@angular/fire/storage';
-import { catchError, concatMap, first, forkJoin, from, map, Observable, of, switchMap, take, tap, throwError } from 'rxjs';
+import { catchError, concatMap, first, forkJoin, from, map, Observable, of, switchMap, take, throwError } from 'rxjs';
 import { AnnotatedDocument } from '../model/annotatedDocument';
 import { PDFDocument } from 'pdf-lib';
 import { DocumentForm } from '../model/documentForm';
-import { SessionService } from './session.service';
 import { BokInformationService } from '@eo4geo/ngx-bok-visualization';
 
 @Injectable({
@@ -24,7 +23,7 @@ export class DatabaseService {
 
   private userId: string = '';
 
-  constructor(private sessionService: SessionService, private bokInfoService: BokInformationService) { 
+  constructor(private bokInfoService: BokInformationService) { 
     this.auth = inject(Auth);
     this.db = inject(Firestore);
     this.storage = inject(Storage)
@@ -33,21 +32,21 @@ export class DatabaseService {
     this.orgCollection = collection(this.db, 'Organizations');
     this.userCollection = collection(this.db, 'Users');
 
-    this.sessionService.userUid$.subscribe(uid => this.userId = uid);
+    authState(this.auth).subscribe(user => this.userId = user?.uid ?? '');
   }
 
-  getUserOrganizations(): Observable<{ _id: string, name: string }[]> {
+  getUserOrganizationList(): Observable<{ _id: string, name: string }[]> {
     return authState(this.auth).pipe(
       switchMap(user => {
         if (user) {
-          const userDocRef: DocumentReference = doc(this.userCollection, user.uid);
-          return docData(userDocRef) as Observable<{ organizations: string[] }>;
+          const docRef: DocumentReference = doc(this.userCollection, user.uid);
+          return docData(docRef) as Observable<{ organizations: string[] }>;
         }
         return of(null);
       }),
       switchMap(userData => {
         if (userData?.organizations && userData.organizations.length > 0) {
-          const orgRequests = userData.organizations.map(orgId => this.getOrganizationInfo(orgId));
+          const orgRequests = userData.organizations.map(orgId => this.getOrganizationName(orgId));
           return forkJoin(orgRequests);
         }
         return of([]);
@@ -55,7 +54,7 @@ export class DatabaseService {
     );
   }
 
-  private getOrganizationInfo(orgId: string): Observable<{ _id: string, name: string }> {
+  private getOrganizationName(orgId: string): Observable<{ _id: string, name: string }> {
     const orgDocRef: DocumentReference = doc(this.orgCollection, orgId);
     return docData(orgDocRef).pipe(
       first(),

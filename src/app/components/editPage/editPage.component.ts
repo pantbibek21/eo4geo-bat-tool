@@ -1,15 +1,12 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-import { UploadDocumentComponent } from '../upload-document/upload-document.component';
+import { Component, inject, OnDestroy, OnInit } from '@angular/core';
 import { BokComponent } from '@eo4geo/ngx-bok-visualization';
 import { AnnotateDocumentComponent } from '../annotate-document/annotate-document.component';
 import { PDFDocument } from 'pdf-lib';
 import { CommonModule } from '@angular/common';
 import { catchError, finalize, of, Subscription, switchMap, take, tap } from 'rxjs';
-import { FileService } from '../../services/file.service';
 import { AccordionModule } from 'primeng/accordion';
 import { ButtonModule } from 'primeng/button';
 import { DividerModule } from 'primeng/divider';
-import { SessionService } from '../../services/session.service';
 import { DocumentInformationComponent } from "../document-information/document-information.component";
 import { DocumentForm } from '../../model/documentForm';
 import { ToastModule } from 'primeng/toast';
@@ -17,6 +14,7 @@ import { MessageService } from "primeng/api";
 import { DatabaseService } from '../../services/database.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
+import { Auth, authState } from '@angular/fire/auth';
 
 @Component({
   standalone: true,
@@ -39,54 +37,42 @@ export class EditPageComponent implements OnInit, OnDestroy {
   concept: string = 'GIST'
   logged: boolean = false;
   pdfDoc: PDFDocument | null = null;
+  formContent: DocumentForm = new DocumentForm();
+  bokRelations: string[] = [];
 
-  formContent: DocumentForm | null = null;
+  private auth;
+  private loggedSubscrition!: Subscription;
 
-  private bokRelations: string[] = [];
-
-  private bokRelationsSubscription!: Subscription;
-  private loggedSubscription!: Subscription;
-
-  constructor(private fileService: FileService, private sessionService: SessionService, private databaseService: DatabaseService, 
-              private messageService: MessageService, private router: Router, private route: ActivatedRoute,private http: HttpClient) {}
+  constructor(private databaseService: DatabaseService, private messageService: MessageService, private router: Router, private route: ActivatedRoute, private http: HttpClient) {
+    this.auth = inject(Auth);
+    this.loggedSubscrition = authState(this.auth).subscribe(user => {
+        this.logged = !!user;
+    });
+  }
 
   ngOnInit(): void {
     const documentId = this.route.snapshot.paramMap.get('id') as string;
     this.databaseService.getDocument(documentId).pipe(
       take(1),
       switchMap(document => {
-        const newConcepts = this.formatFirestoreConcepts(document.concepts);
-        const newDocForm = {
+        this.bokRelations = this.formatFirestoreConcepts(document.concepts);
+        this.formContent = {
           name: document.name,
           description: document.description,
           publicFile: document.isPublic,
           organization: {_id: document.orgId, name: document.orgName},
           division: document.division
         };
-        this.fileService.setDocumentForm(newDocForm);
-        this.fileService.setBokConcept(newConcepts);
         return this.http.get(document.url, { responseType: 'blob' })
       }),
       switchMap( blob => blob.arrayBuffer()),
       switchMap( file => PDFDocument.load(file)),
-      tap( file => {
-        this.fileService.setPdfFile(file)
-        this.pdfDoc = file;
-      })
+      tap( file => this.pdfDoc = file )
     ).subscribe();
-
-    this.bokRelationsSubscription = this.fileService.bokConcept$.subscribe(concepts => {
-      this.bokRelations = concepts;
-    });
-    this.loggedSubscription = this.sessionService.logged$.subscribe(newValue => {
-      this.logged = newValue;
-    })
   }
 
   ngOnDestroy() {
-    this.bokRelationsSubscription.unsubscribe();
-    this.loggedSubscription.unsubscribe();
-    this.fileService.resetValues();
+    this.loggedSubscrition.unsubscribe();
   }
 
   private formatFirestoreConcepts(concepts: string[]){
@@ -145,7 +131,7 @@ export class EditPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateFormContent(data: DocumentForm | null) {
+  updateFormContent(data: DocumentForm) {
     this.formContent = data;
   }
 

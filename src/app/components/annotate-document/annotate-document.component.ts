@@ -1,50 +1,33 @@
-import { Component, Input, OnDestroy, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BokInformationService } from '@eo4geo/ngx-bok-visualization';
 import { map, Observable, Subscription, take } from 'rxjs';
-import { FileService } from '../../services/file.service';
 import { ButtonModule } from 'primeng/button';
 import { ChipModule } from 'primeng/chip';
 import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
+  standalone: true,
   selector: 'app-annotate-document',
   imports: [CommonModule, ButtonModule, ChipModule, TooltipModule],
   templateUrl: './annotate-document.component.html',
   styleUrl: './annotate-document.component.css',
 })
-export class AnnotateDocumentComponent implements OnInit, OnDestroy {
+export class AnnotateDocumentComponent {
   @Input() concept: string = 'GIST';
-  bokConcepts: string[] = [];
+  @Input() isPdfAvailable: boolean = false;
+  @Input() bokConcepts: string[] = [];
+  @Output() bokConceptsChange: EventEmitter<string[]> = new EventEmitter();
   message: string = '';
-  isPdfAvailable: boolean = false;
 
-  private bokConceptsSubscription!: Subscription;
-  private isPdfAvailableSuscription!: Subscription; 
-
-  constructor(private fileService: FileService, private bokInfoService: BokInformationService) {}
-
-  ngOnInit() {
-    this.bokConceptsSubscription = this.fileService.bokConcept$.subscribe(concepts => {
-      this.bokConcepts = concepts;
-    });
-
-    this.isPdfAvailableSuscription = this.fileService.pdfFile$.subscribe(file => {
-      this.isPdfAvailable = file != null;
-    });
-  }
-
-  ngOnDestroy(): void {
-    this.bokConceptsSubscription.unsubscribe();
-    this.isPdfAvailableSuscription.unsubscribe();
-  }
+  constructor(private bokInfoService: BokInformationService) {}
 
   onClear() {
-    this.fileService.setBokConcept([]);
+    this.bokConceptsChange.emit([]);
   }
 
   deleteBokConcept(concept: string) {
-    this.fileService.setBokConcept(this.bokConcepts.filter((item) => item !== concept));
+    this.bokConceptsChange.emit(this.bokConcepts.filter((item) => item !== concept));
   }
 
   addAnnotation() {
@@ -53,7 +36,7 @@ export class AnnotateDocumentComponent implements OnInit, OnDestroy {
 
       setTimeout(() => (this.message = ''), 3000);
     } else {
-      this.fileService.setBokConcept([...this.bokConcepts, this.concept]);
+      this.bokConceptsChange.emit([...this.bokConcepts, this.concept]);
     }
   }
 

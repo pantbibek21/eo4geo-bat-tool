@@ -1,21 +1,20 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { UploadDocumentComponent } from '../upload-document/upload-document.component';
 import { BokComponent } from '@eo4geo/ngx-bok-visualization';
 import { AnnotateDocumentComponent } from '../annotate-document/annotate-document.component';
 import { PDFDocument } from 'pdf-lib';
 import { CommonModule } from '@angular/common';
 import { catchError, finalize, of, Subscription } from 'rxjs';
-import { FileService } from '../../services/file.service';
 import { AccordionModule } from 'primeng/accordion';
 import { ButtonModule } from 'primeng/button';
 import { DividerModule } from 'primeng/divider';
-import { SessionService } from '../../services/session.service';
 import { DocumentInformationComponent } from "../document-information/document-information.component";
 import { DocumentForm } from '../../model/documentForm';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from "primeng/api";
 import { DatabaseService } from '../../services/database.service';
 import { Router } from '@angular/router';
+import { Auth, authState } from '@angular/fire/auth';
 
 @Component({
   standalone: true,
@@ -35,39 +34,25 @@ import { Router } from '@angular/router';
   ],
   providers: [MessageService]
 })
-export class MainPageComponent implements OnInit, OnDestroy {
+export class MainPageComponent {
   concept: string = 'GIST'
   logged: boolean = false;
   pdfDoc: PDFDocument | null = null;
+  formContent: DocumentForm = new DocumentForm();
+  bokRelations: string[] = [];
 
-  formContent: DocumentForm | null = null;
+  private auth;
+  private loggedSubscrition!: Subscription;
 
-  private bokRelations: string[] = [];
-
-  private bokRelationsSubscription!: Subscription;
-  private pdfDocSubscription!: Subscription;
-  private loggedSubscription!: Subscription;
-
-  constructor(private fileService: FileService, private sessionService: SessionService, private databaseService: DatabaseService, 
-              private messageService: MessageService, private router: Router) {}
-
-  ngOnInit(): void {
-    this.bokRelationsSubscription = this.fileService.bokConcept$.subscribe(concepts => {
-      this.bokRelations = concepts;
+  constructor(private databaseService: DatabaseService, private messageService: MessageService, private router: Router) {
+    this.auth = inject(Auth);
+    this.loggedSubscrition = authState(this.auth).subscribe(user => {
+        this.logged = !!user;
     });
-    this.pdfDocSubscription = this.fileService.pdfFile$.subscribe(file => {
-      this.pdfDoc = file;
-    });
-    this.loggedSubscription = this.sessionService.logged$.subscribe(newValue => {
-      this.logged = newValue;
-    })
   }
 
   ngOnDestroy() {
-    this.pdfDocSubscription.unsubscribe();
-    this.bokRelationsSubscription.unsubscribe();
-    this.loggedSubscription.unsubscribe();
-    this.fileService.resetValues();
+    this.loggedSubscrition.unsubscribe();
   }
 
   async onDownload() {
@@ -75,7 +60,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
     if (this.pdfDoc) {
       // function returns the configured string in RDF format
       const relationsMetadata = this.configureMetaData(this.bokRelations);
-      this.pdfDoc?.setTitle(this.formContent?.name + '_annotated');
+      this.pdfDoc?.setTitle(this.formContent.name + '_annotated');
 
       // stores the RDF format string holding BoK keys and relations
       this.pdfDoc?.setSubject(relationsMetadata);
@@ -120,7 +105,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
     }
   }
 
-  updateFormContent(data: DocumentForm | null) {
+  updateFormContent(data: DocumentForm) {
     this.formContent = data;
   }
 
