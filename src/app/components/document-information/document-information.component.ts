@@ -65,9 +65,6 @@ export class DocumentInformationComponent {
   }
 
   updateDocumentForm() {
-    if (this.selectedOrganization == null || this.selectedDivision == null || this.formData.name.trim() == '') {
-      return;
-    }
     this.formData.organization = this.selectedOrganization ?? {_id: '', name: ''};
     this.formData.division = this.selectedDivision ?? '';
     this.formDataChange.next(this.formData);

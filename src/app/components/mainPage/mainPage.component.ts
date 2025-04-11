@@ -79,7 +79,7 @@ export class MainPageComponent {
   }
 
   onSave() {
-    if (this.pdfDoc && this.formContent) {
+    if (this.pdfDoc && this.checkFormContent()) {
       const relationsMetadata = this.configureMetaData(this.bokRelations);
       this.pdfDoc?.setTitle(this.formContent?.name + '_annotated');
       this.pdfDoc?.setSubject(relationsMetadata);
@@ -103,6 +103,10 @@ export class MainPageComponent {
         })
       ).subscribe();
     }
+  }
+
+  checkFormContent(): boolean {
+    return (this.formContent.name != '' && this.formContent.organization._id != '' && this.formContent.division != '')
   }
 
   updateFormContent(data: DocumentForm) {
