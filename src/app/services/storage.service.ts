@@ -42,21 +42,33 @@ export class StorageService {
     );
   }
 
+  updateDocument(file: PDFDocument, data: DocumentForm, concepts: string[], url: string, docId: string): Observable<void> {
+    if (this.userId == '') return throwError(() => new Error('Login to save a file'));
+    const documentPath = this.extractFirebasePath(url) ?? undefined;
+    return this.preparePdfBlob(file).pipe(
+      concatMap(blob => this.uploadPdf(blob, data.name, documentPath)),
+      concatMap(downloadUrl => this.saveDocumentMetadata(downloadUrl, data, concepts, docId)),
+      catchError( () => throwError(
+        () => new Error('Something went wrong. Try to upload this file later.')
+      ))
+    );
+  }
+
   private preparePdfBlob(file: PDFDocument): Observable<Blob> {
     return from(file.save()).pipe(
       map(pdfBytes => new Blob([pdfBytes], { type: 'application/pdf' }))
     );
   }
 
-  private uploadPdf(blob: Blob, fileName: string): Observable<string> {
-    const path = `other/custom-${fileName}-${this.userId}-${Date.now()}`;
+  private uploadPdf(blob: Blob, fileName: string, docPath?: string): Observable<string> {
+    const path = docPath ?? `other/custom-${fileName}-${this.userId}-${Date.now()}`;
     const storageRef = ref(this.storage, path);
     return from(uploadBytes(storageRef, blob)).pipe(
       concatMap(() => getDownloadURL(storageRef))
     );
   }
 
-  private saveDocumentMetadata(downloadUrl: string, data: DocumentForm, concepts: string[]): Observable<void> {
+  private saveDocumentMetadata(downloadUrl: string, data: DocumentForm, concepts: string[], docId?: string): Observable<void> {
     const conceptObservables = concepts.length > 0 ? forkJoin(concepts.map(concept =>
       this.bokInfoService.getConceptName(concept).pipe(
         take(1),
@@ -67,7 +79,7 @@ export class StorageService {
     return conceptObservables.pipe(
       concatMap(formatedConcepts => {
         const timestamp = serverTimestamp();
-        const orgRef = doc(this.docsCollection);
+        const orgRef = docId ? doc(this.docsCollection, docId) : doc(this.docsCollection);
         const newDocument: AnnotatedDocument = new AnnotatedDocument(orgRef.id, downloadUrl, this.userId, data.organization._id, data.organization.name, 'Other', 'Other', data.publicFile, data.name, data.name, data.description, formatedConcepts, 3, timestamp, timestamp, data.division);
         return from(setDoc(orgRef, newDocument.toPlainObject()));
       })
@@ -121,10 +133,6 @@ export class StorageService {
   getDocument(id: string): Observable<AnnotatedDocument> {
     const docReference = doc(this.docsCollection, id)
     return docData(docReference) as Observable<AnnotatedDocument>
-  }
-
-  updateDocument(file: PDFDocument, data: DocumentForm, concepts: string[]): Observable<void> {
-    return of()
   }
 
 }

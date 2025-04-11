@@ -15,6 +15,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Auth, authState } from '@angular/fire/auth';
 import { StorageService } from '../../services/storage.service';
+import { AnnotatedDocument } from '../../model/annotatedDocument';
 
 @Component({
   standalone: true,
@@ -42,6 +43,7 @@ export class EditPageComponent implements OnInit, OnDestroy {
 
   private auth;
   private loggedSubscrition!: Subscription;
+  private annotatedDocument: AnnotatedDocument = new AnnotatedDocument('','','','', '', '', '', false, '', '', '', [], 3, null, null, '');
 
   constructor(private storageService: StorageService, private messageService: MessageService, private router: Router, private route: ActivatedRoute, private http: HttpClient) {
     this.auth = inject(Auth);
@@ -55,6 +57,7 @@ export class EditPageComponent implements OnInit, OnDestroy {
     this.storageService.getDocument(documentId).pipe(
       take(1),
       concatMap(document => {
+        this.annotatedDocument = document;
         this.bokRelations = this.formatFirestoreConcepts(document.concepts);
         this.formContent = {
           name: document.name,
@@ -110,7 +113,7 @@ export class EditPageComponent implements OnInit, OnDestroy {
       this.pdfDoc?.setTitle(this.formContent?.name + '_annotated');
       this.pdfDoc?.setSubject(relationsMetadata);
       let isSuccess = true;
-      this.storageService.updateDocument(this.pdfDoc, this.formContent, this.bokRelations).pipe(
+      this.storageService.updateDocument(this.pdfDoc, this.formContent, this.bokRelations, this.annotatedDocument.url, this.annotatedDocument._id).pipe(
         catchError((error) => {
           isSuccess = false;
           this.messageService.add({ 
