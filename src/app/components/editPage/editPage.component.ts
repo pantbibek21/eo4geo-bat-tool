@@ -3,7 +3,7 @@ import { BokComponent } from '@eo4geo/ngx-bok-visualization';
 import { AnnotateDocumentComponent } from '../annotate-document/annotate-document.component';
 import { PDFDocument } from 'pdf-lib';
 import { CommonModule } from '@angular/common';
-import { catchError, finalize, of, Subscription, switchMap, take, tap } from 'rxjs';
+import { catchError, concatMap, finalize, of, Subscription, take, tap } from 'rxjs';
 import { AccordionModule } from 'primeng/accordion';
 import { ButtonModule } from 'primeng/button';
 import { DividerModule } from 'primeng/divider';
@@ -11,10 +11,10 @@ import { DocumentInformationComponent } from "../document-information/document-i
 import { DocumentForm } from '../../model/documentForm';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from "primeng/api";
-import { DatabaseService } from '../../services/database.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { Auth, authState } from '@angular/fire/auth';
+import { StorageService } from '../../services/storage.service';
 
 @Component({
   standalone: true,
@@ -43,7 +43,7 @@ export class EditPageComponent implements OnInit, OnDestroy {
   private auth;
   private loggedSubscrition!: Subscription;
 
-  constructor(private databaseService: DatabaseService, private messageService: MessageService, private router: Router, private route: ActivatedRoute, private http: HttpClient) {
+  constructor(private storageService: StorageService, private messageService: MessageService, private router: Router, private route: ActivatedRoute, private http: HttpClient) {
     this.auth = inject(Auth);
     this.loggedSubscrition = authState(this.auth).subscribe(user => {
         this.logged = !!user;
@@ -52,9 +52,9 @@ export class EditPageComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const documentId = this.route.snapshot.paramMap.get('id') as string;
-    this.databaseService.getDocument(documentId).pipe(
+    this.storageService.getDocument(documentId).pipe(
       take(1),
-      switchMap(document => {
+      concatMap(document => {
         this.bokRelations = this.formatFirestoreConcepts(document.concepts);
         this.formContent = {
           name: document.name,
@@ -65,8 +65,8 @@ export class EditPageComponent implements OnInit, OnDestroy {
         };
         return this.http.get(document.url, { responseType: 'blob' })
       }),
-      switchMap( blob => blob.arrayBuffer()),
-      switchMap( file => PDFDocument.load(file)),
+      concatMap( blob => blob.arrayBuffer()),
+      concatMap( file => PDFDocument.load(file)),
       tap( file => this.pdfDoc = file )
     ).subscribe();
   }
@@ -110,7 +110,7 @@ export class EditPageComponent implements OnInit, OnDestroy {
       this.pdfDoc?.setTitle(this.formContent?.name + '_annotated');
       this.pdfDoc?.setSubject(relationsMetadata);
       let isSuccess = true;
-      this.databaseService.updateDocument(this.pdfDoc, this.formContent, this.bokRelations).pipe(
+      this.storageService.updateDocument(this.pdfDoc, this.formContent, this.bokRelations).pipe(
         catchError((error) => {
           isSuccess = false;
           this.messageService.add({ 

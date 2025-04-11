@@ -9,8 +9,8 @@ import { TextareaModule } from 'primeng/textarea';
 import { SelectButtonModule } from 'primeng/selectbutton';
 import { SelectModule } from 'primeng/select';
 import { BehaviorSubject, Subscription, take } from 'rxjs';
-import { DatabaseService } from '../../services/database.service';
 import { DocumentForm } from '../../model/documentForm';
+import { UserInformationService } from '../../services/userInformation.service';
 
 @Component({
   standalone: true,
@@ -34,19 +34,19 @@ export class DocumentInformationComponent {
   organizationDivisions: Map<string, string[]> = new Map();
   selectedDivision: string | null = null;
 
-  private organizationsSubscription!: Subscription;
+  private userInfoSubscription!: Subscription;
 
-  constructor(private databaseService: DatabaseService) {}
+  constructor(private userInfoService: UserInformationService) {}
 
   ngOnInit() {
     this.selectedOrganization = (this.formData?.organization._id == '' && this.formData?.organization.name == '') ? null : this.formData?.organization!;
     this.selectedDivision = this.formData?.division ?? null;
 
-    this.organizationsSubscription = this.databaseService.getUserOrganizationList().subscribe(orgs => {
+    this.userInfoSubscription = this.userInfoService.getUserOrganizationList().subscribe(orgs => {
       this.organizations = orgs;
       this.organizationDivisions = new Map();
       this.organizations.forEach( org => {
-        this.databaseService.getOrganizationDivisions(org._id).pipe(take(1)).subscribe(divisions => {
+        this.userInfoService.getOrganizationDivisions(org._id).pipe(take(1)).subscribe(divisions => {
           this.organizationDivisions.set(org._id, divisions);
         })
       })
@@ -54,11 +54,11 @@ export class DocumentInformationComponent {
   }
 
   ngOnDestroy(): void {
-    this.organizationsSubscription.unsubscribe();
+    this.userInfoSubscription.unsubscribe();
   }
 
   ngOnChanges(changes: SimpleChanges) {
-    if (changes['formData']) {
+    if (changes['formData'] && !changes['formData'].isFirstChange()) {
       this.selectedOrganization = (this.formData?.organization._id == '' && this.formData?.organization.name == '') ? null : this.formData?.organization;
       this.selectedDivision = this.formData?.division ?? null;
     }

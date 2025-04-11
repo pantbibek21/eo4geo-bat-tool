@@ -12,7 +12,7 @@ import { DocumentInformationComponent } from "../document-information/document-i
 import { DocumentForm } from '../../model/documentForm';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from "primeng/api";
-import { DatabaseService } from '../../services/database.service';
+import { StorageService } from '../../services/storage.service';
 import { Router } from '@angular/router';
 import { Auth, authState } from '@angular/fire/auth';
 
@@ -44,7 +44,7 @@ export class MainPageComponent {
   private auth;
   private loggedSubscrition!: Subscription;
 
-  constructor(private databaseService: DatabaseService, private messageService: MessageService, private router: Router) {
+  constructor(private storageService: StorageService, private messageService: MessageService, private router: Router) {
     this.auth = inject(Auth);
     this.loggedSubscrition = authState(this.auth).subscribe(user => {
         this.logged = !!user;
@@ -84,7 +84,7 @@ export class MainPageComponent {
       this.pdfDoc?.setTitle(this.formContent?.name + '_annotated');
       this.pdfDoc?.setSubject(relationsMetadata);
       let isSuccess = true;
-      this.databaseService.saveDocument(this.pdfDoc, this.formContent, this.bokRelations).pipe(
+      this.storageService.saveDocument(this.pdfDoc, this.formContent, this.bokRelations).pipe(
         catchError((error) => {
           isSuccess = false;
           this.messageService.add({ 

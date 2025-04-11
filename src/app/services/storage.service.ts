@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { Auth, authState } from '@angular/fire/auth';
-import { collection, collectionData, CollectionReference, deleteDoc, doc, docData, DocumentReference, Firestore, query, serverTimestamp, setDoc, where } from '@angular/fire/firestore';
+import { collection, collectionData, CollectionReference, deleteDoc, doc, docData, Firestore, query, serverTimestamp, setDoc, where } from '@angular/fire/firestore';
 import { deleteObject, getDownloadURL, ref, Storage, uploadBytes } from '@angular/fire/storage';
-import { catchError, concatMap, first, forkJoin, from, map, Observable, of, switchMap, take, throwError } from 'rxjs';
+import { catchError, concatMap, forkJoin, from, map, Observable, of, take, throwError } from 'rxjs';
 import { AnnotatedDocument } from '../model/annotatedDocument';
 import { PDFDocument } from 'pdf-lib';
 import { DocumentForm } from '../model/documentForm';
@@ -11,15 +11,13 @@ import { BokInformationService } from '@eo4geo/ngx-bok-visualization';
 @Injectable({
   providedIn: 'root',
 })
-export class DatabaseService {
+export class StorageService {
 
   private auth;
   private db;
   private storage;
 
   private docsCollection: CollectionReference;
-  private orgCollection: CollectionReference;
-  private userCollection: CollectionReference;
 
   private userId: string = '';
 
@@ -29,46 +27,8 @@ export class DatabaseService {
     this.storage = inject(Storage)
 
     this.docsCollection = collection(this.db, 'Other');
-    this.orgCollection = collection(this.db, 'Organizations');
-    this.userCollection = collection(this.db, 'Users');
 
     authState(this.auth).subscribe(user => this.userId = user?.uid ?? '');
-  }
-
-  getUserOrganizationList(): Observable<{ _id: string, name: string }[]> {
-    if (this.userId) {
-      const userRef: DocumentReference = doc(this.userCollection, this.userId);
-      return docData(userRef).pipe(
-        switchMap(userData => {
-          const organizations = userData?.['organizations'] as string[]
-          if (organizations && organizations.length > 0){
-            const orgRequests = organizations.map(orgId => this.getOrganizationName(orgId));
-            return forkJoin(orgRequests);
-          }
-          return of([]);
-      }),
-    );
-    }
-    return of([]);
-  }
-
-  private getOrganizationName(orgId: string): Observable<{ _id: string, name: string }> {
-    const orgDocRef: DocumentReference = doc(this.orgCollection, orgId);
-    return docData(orgDocRef).pipe(
-      first(),
-      map(document => ({
-        _id: document?.['_id'],
-        name: document?.['name'],
-      }))
-    );
-  }
-
-  getOrganizationDivisions(orgId: string): Observable<string[]> {
-    const orgDocRef = doc(this.orgCollection, orgId);
-    const organizationUsersSnapshot = docData(orgDocRef) as Observable<{ divisions: string[] }>;
-    return organizationUsersSnapshot.pipe(
-      map(data => data.divisions)
-    );
   }
 
   saveDocument(file: PDFDocument, data: DocumentForm, concepts: string[]): Observable<void> {
@@ -116,7 +76,7 @@ export class DatabaseService {
 
   getAnnotatedDocuments(): Observable<AnnotatedDocument[]> {
     return authState(this.auth).pipe(
-      switchMap(user => {
+      concatMap(user => {
         if (user) {
           const selfDocsQuery = query(this.docsCollection, where('userId', '==', user.uid));
           return collectionData(selfDocsQuery) as Observable<AnnotatedDocument[]>;

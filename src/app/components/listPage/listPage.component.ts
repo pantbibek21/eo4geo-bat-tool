@@ -10,7 +10,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputIconModule } from 'primeng/inputicon';
 import { ConfirmDialogModule } from 'primeng/confirmdialog';
 import { ConfirmationService, MessageService } from "primeng/api";
-import { DatabaseService } from '../../services/database.service';
+import { StorageService } from '../../services/storage.service';
 import { AnnotatedDocument } from '../../model/annotatedDocument';
 import { catchError, finalize, of, Subscription } from 'rxjs';
 import { DocumentModalComponent } from "../document-modal/document-modal.component";
@@ -39,11 +39,11 @@ export class ListPageComponent implements OnInit, OnDestroy {
 
   private documentsSubscription!: Subscription;
 
-  constructor(private databaseService: DatabaseService, private messageService: MessageService, 
+  constructor(private storageService: StorageService, private messageService: MessageService, 
               private confirmationService: ConfirmationService, private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
-    this.documentsSubscription = this.databaseService.getAnnotatedDocuments().subscribe(newDocuments => {
+    this.documentsSubscription = this.storageService.getAnnotatedDocuments().subscribe(newDocuments => {
       this.documents = newDocuments;
       this.filteredDocuments = this.documents;
     });
@@ -83,7 +83,7 @@ export class ListPageComponent implements OnInit, OnDestroy {
 
   deleteDocument(document: AnnotatedDocument) {
     let isSuccess = true;
-    this.databaseService.deleteDocument(document).pipe(
+    this.storageService.deleteDocument(document).pipe(
       catchError((error) => {
         isSuccess = false;
         this.messageService.add({ 
