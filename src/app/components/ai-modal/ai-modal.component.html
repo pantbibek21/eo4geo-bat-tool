@@ -1,68 +1,109 @@
 <div class="modal-container">
   <div class="form-container">
-    <div class="form-field">
-      <label for="annotation-number" style="margin-right: 8px"
-        >Enter annotation number</label
-      >
-      <input
-        [(ngModel)]="annotationNumber"
-        type="number"
-        id="annotation-number"
-        name="annotation-number"
-        required
-      />
-    </div>
+    <p-floatlabel
+      variant="on"
+      class="custom-floatlabel"
+      style="margin-bottom: 16px"
+    >
+      <p-iconfield>
+        <p-inputicon class="pi pi-pencil" />
+        <input
+          pInputText
+          id="name"
+          autocomplete="off"
+          class="w-full custom-input"
+          [(ngModel)]="annotationNumber"
+        />
+      </p-iconfield>
+      <label for="name">Annotation number required</label>
+    </p-floatlabel>
 
     <div class="form-field">
-      <fieldset>
-        <legend>Select annotation depth</legend>
+      <fieldset class="radio-group">
+        <legend class="radio-legend">Select annotation depth</legend>
 
-        <div>
-          <input
-            [(ngModel)]="annotationDepth"
-            type="radio"
-            id="high"
-            name="annotation-depth"
-            value="high"
-            required
-            checked
-          />
-          <label for="high">High</label>
-        </div>
+        <div class="radio-options">
+          <div class="p-field-radiobutton">
+            <p-radioButton
+              name="annotation-depth"
+              value="high"
+              [(ngModel)]="annotationDepth"
+              inputId="high"
+            ></p-radioButton>
+            <label for="high">High</label>
+          </div>
 
-        <div>
-          <input
-            [(ngModel)]="annotationDepth"
-            type="radio"
-            id="medium"
-            name="annotation-depth"
-            value="medium"
-          />
-          <label for="medium">Medium</label>
-        </div>
+          <div class="p-field-radiobutton">
+            <p-radioButton
+              name="annotation-depth"
+              value="medium"
+              [(ngModel)]="annotationDepth"
+              inputId="medium"
+            ></p-radioButton>
+            <label for="medium">Medium</label>
+          </div>
 
-        <div>
-          <input
-            [(ngModel)]="annotationDepth"
-            type="radio"
-            id="low"
-            name="annotation-depth"
-            value="low"
-          />
-          <label for="low">Low</label>
+          <div class="p-field-radiobutton">
+            <p-radioButton
+              name="annotation-depth"
+              value="low"
+              [(ngModel)]="annotationDepth"
+              inputId="low"
+            ></p-radioButton>
+            <label for="low">Low</label>
+          </div>
         </div>
       </fieldset>
     </div>
 
     <div class="button-container">
       <p-button
-        class="custom-button"
-        [disabled]="!annotationDepth"
+        class="custom-button generate-button"
+        [disabled]="!annotationDepth || isLoading"
         (click)="generateRelation()"
       >
-        Generate
+        <ng-container *ngIf="!isLoading; else loadingTemplate">
+          Generate
+        </ng-container>
+        <ng-template #loadingTemplate>
+          <i class="pi pi-spinner pi-spin"></i>
+        </ng-template>
       </p-button>
+
       <p-button class="custom-button" (click)="closeModal()"> Close </p-button>
+    </div>
+
+    <div class="annotation-panel" *ngIf="aiBokConcepts.length !== 0">
+      <div class="flex align-items-start flex-wrap annotation-chip-list">
+        <ng-container *ngFor="let concept of aiBokConcepts">
+          <p-chip
+            [label]="'[' + concept + '] ' + (getConceptName(concept) | async)"
+            [removable]="false"
+            [style.background]="getBackgroundColor(concept) | async"
+            [style.color]="'var(--primary-color)'"
+            [style]="{ '--p-chip-remove-icon-color': 'var(--primary-color)' }"
+            [style.border]="
+              selectedAiConcepts.includes(concept) ? '2px solid #3fb3f8' : ''
+            "
+            [style.cursor]="'pointer'"
+            class="lg:white-space-nowrap"
+            (click)="toggleConceptSelection(concept)"
+          />
+        </ng-container>
+      </div>
+
+      <div class="annotation-actions">
+        <p-button class="annotation-submit-btn" (click)="addBokSelection()">
+          Add selected annotation
+        </p-button>
+        <p
+          *ngIf="errorMessage"
+          style="color: var(--danger-color)"
+          class="annotation-error-msg"
+        >
+          {{ errorMessage }}
+        </p>
+      </div>
     </div>
   </div>
 </div>
