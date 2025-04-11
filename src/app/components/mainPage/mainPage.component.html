@@ -3,7 +3,7 @@
     <div class="flex-1 px-4 py-2 max-w-50rem min-w-full lg:min-w-0">
         <div class="flex justify-content-between">
             <h2>New Annotation</h2>
-            <p-button class="docs-button m-3 mr-0" [ngClass]="logged ? 'docs-button-hover' : ''" variant="text" label="My Documents" 
+            <p-button class="docs-button m-3 mr-0" *ngIf="logged" variant="text" label="My Documents" 
                     icon="pi pi-file" (click)="navigateToMyDocs()" [disabled]="!logged" />
         </div>
         <div class="h-full flex flex-column">

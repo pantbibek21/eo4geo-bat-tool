@@ -26,5 +26,10 @@
   
   <p-select [options]="organizationDivisions.get(selectedOrganization?._id ?? '') || []" [showClear]="true" [disabled]="!logged || !isPdfAvailable || selectedOrganization == null" [(ngModel)]="selectedDivision" 
             placeholder="Select a Division*" class="w-full custom-select" [checkmark]="true" (ngModelChange)="updateDocumentForm()"/>
-  <p class="text-sm m-0 ml-auto">* Mandatory fields to save annotated PDF</p>
+  <div class="flex justify-content-between flex-wrap">
+    <p *ngIf="getValidationMessage()" class="text-sm m-0" style="color: var(--danger-color);">
+      {{ getValidationMessage() }}
+    </p>
+    <p class="text-sm m-0 xl:ml-auto">* Mandatory fields to save annotated PDF</p>
+  </div>
 </div>

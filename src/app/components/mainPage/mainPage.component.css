@@ -46,6 +46,6 @@
     --p-button-text-primary-active-background: var(--p-button-text-secondary-active-background);
 }
 
-.docs-button-hover:hover {
+.docs-button:hover {
     --p-button-text-primary-color: var(--hover-color);
   }
