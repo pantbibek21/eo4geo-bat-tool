@@ -19,7 +19,17 @@
             "tsConfig": "tsconfig.app.json",
             "assets": [
               "src/favicon.ico",
-              "src/assets"
+              "src/assets",
+              {
+                "glob": "**/*",
+                "input": "node_modules/pdfjs-dist/build",
+                "output": "assets/pdfjs/build"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/pdfjs-dist/web",
+                "output": "assets/pdfjs/web"
+              }
             ],
             "styles": [
               "src/styles.css",
@@ -30,7 +40,7 @@
             "sourceMap": true
           },
           "configurations": {
-            "production": {            
+            "production": {
               "budgets": [
                 {
                   "type": "initial",
@@ -84,13 +94,8 @@
           "options": {
             "polyfills": ["zone.js", "zone.js/testing"],
             "tsConfig": "tsconfig.spec.json",
-            "assets": [
-              "src/favicon.ico",
-              "src/assets"
-            ],
-            "styles": [
-              "src/styles.css"
-            ],
+            "assets": ["src/favicon.ico", "src/assets"],
+            "styles": ["src/styles.css"],
             "scripts": []
           }
         },

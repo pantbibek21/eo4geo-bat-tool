@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { HeaderComponent, FooterComponent } from '@eo4geo/ngx-bok-utils';
 import { MenuItem } from 'primeng/api';
 import { Router, RouterOutlet } from '@angular/router';
+import { GlobalWorkerOptions } from 'pdfjs-dist';
 
 @Component({
   standalone: true,
@@ -77,7 +78,9 @@ export class AppComponent {
     },
   ];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router) {
+    GlobalWorkerOptions.workerSrc = `assets/pdfjs/build/pdf.worker.js`;
+  }
 
   redirectToProfile() {
     this.router.navigate(['profile'], { replaceUrl: true });
