@@ -13,6 +13,7 @@ import { IconFieldModule } from 'primeng/iconfield';
 import { InputTextModule } from 'primeng/inputtext';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { RadioButtonModule } from 'primeng/radiobutton';
+import { PdfExtractService } from '../../services/pdf-extract.service';
 
 @Component({
   selector: 'app-ai-modal',
@@ -42,12 +43,14 @@ export class AiModalComponent implements OnInit, OnDestroy {
   aiBokConcepts: string[] = [];
   selectedAiConcepts: string[] = [];
   errorMessage: string = '';
+  extractedContent: string = '';
 
   private bokConceptsSubscription!: Subscription;
 
   constructor(
     private fileService: FileService,
-    private sharedService: SharedService
+    private sharedService: SharedService,
+    private pdfExtractService: PdfExtractService
   ) {}
 
   ngOnInit() {
@@ -62,8 +65,11 @@ export class AiModalComponent implements OnInit, OnDestroy {
     this.bokConceptsSubscription.unsubscribe();
   }
 
+  async getExtractedContent() {
+    this.extractedContent = await this.pdfExtractService.extractText();
+  }
+
   generateRelation() {
-    console.log('Hello');
     this.isLoading = true;
 
     setTimeout(() => {
