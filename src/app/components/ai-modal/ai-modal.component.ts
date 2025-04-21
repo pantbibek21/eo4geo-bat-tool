@@ -14,6 +14,7 @@ import { InputTextModule } from 'primeng/inputtext';
 import { FloatLabelModule } from 'primeng/floatlabel';
 import { RadioButtonModule } from 'primeng/radiobutton';
 import { PdfExtractService } from '../../services/pdf-extract.service';
+import { AiService } from '../../services/ai.service';
 
 @Component({
   selector: 'app-ai-modal',
@@ -50,7 +51,8 @@ export class AiModalComponent implements OnInit, OnDestroy {
   constructor(
     private fileService: FileService,
     private sharedService: SharedService,
-    private pdfExtractService: PdfExtractService
+    private pdfExtractService: PdfExtractService,
+    private aiService: AiService
   ) {}
 
   ngOnInit() {
@@ -67,6 +69,10 @@ export class AiModalComponent implements OnInit, OnDestroy {
 
   async getExtractedContent() {
     this.extractedContent = await this.pdfExtractService.extractText();
+  }
+
+  generateAnnotations() {
+    this.aiService.generateAnnotation();
   }
 
   generateRelation() {
