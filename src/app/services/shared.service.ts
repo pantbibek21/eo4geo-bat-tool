@@ -11,7 +11,11 @@ export class SharedService {
   getBackgroundColor(concept: string) {
     return this.bokInfoService.getConceptColor(concept).pipe(
       take(1),
-      map((hex) => this.hexToRgba(hex, 0.5))
+      map((hex) => {
+        const fallbackHex = '#ffcccc'; // default light red
+        const colorHex = hex ?? fallbackHex; // use fallback if hex is null or undefined
+        return this.hexToRgba(colorHex, 0.5);
+      })
     );
   }
 

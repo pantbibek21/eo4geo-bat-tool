@@ -47,6 +47,7 @@ export class AiModalComponent implements OnInit, OnDestroy {
   extractedContent: string = '';
 
   private bokConceptsSubscription!: Subscription;
+  private errorMessageSubscription!: Subscription;
 
   constructor(
     private fileService: FileService,
@@ -61,49 +62,58 @@ export class AiModalComponent implements OnInit, OnDestroy {
         this.bokConcepts = concepts;
       }
     );
+    this.errorMessageSubscription = this.aiService.errorMessage$.subscribe(
+      (msg) => {
+        this.errorMessage = msg;
+      }
+    );
   }
 
   ngOnDestroy(): void {
     this.bokConceptsSubscription.unsubscribe();
+    this.errorMessageSubscription.unsubscribe();
   }
 
-  async getExtractedContent() {
-    this.extractedContent = await this.pdfExtractService.extractText();
-  }
-
-  generateAnnotations() {
-    this.aiService.generateAnnotation();
-  }
-
-  generateRelation() {
+  async generateAnnotations() {
     this.isLoading = true;
+    this.errorMessage = '';
 
-    setTimeout(() => {
-      // render the relations in below container
-      // invoke the gpt and gpt provides following
-      this.gptReponse = [
-        'SA3-2-1-1-6',
-        'SA3-2-1-1-7',
-        'SA3-2-1-1-8',
-        'SA3-2-1-1-9',
-        'SA3-2-1-1-10',
-        'SA3-2-1-1-5',
-        'SA3-2-1-1-5',
-        'SA3-2-1-1-1',
-        'SA3-2-1-1-2',
-        'SA3-2-1-1-3',
-        'SA3-2-1-1-4',
-      ];
+    this.extractedContent = await this.pdfExtractService.extractText();
+    console.log(this.extractedContent);
 
-      // check if generated relation is already in our BoK concepts; otherwise keep
-      this.gptReponse.forEach((item) => {
-        if (!this.bokConcepts.includes(item)) {
-          this.aiBokConcepts.push(item);
-        }
-      });
+    const rawOutput = await this.aiService.generateAnnotation(
+      this.extractedContent,
+      this.annotationDepth,
+      this.annotationNumber
+    );
 
+    if (!rawOutput) {
+      this.errorMessage = 'Failed to generate annotation.';
       this.isLoading = false;
-    }, 1000);
+      return;
+    }
+
+    let response;
+
+    try {
+      response = JSON.parse(rawOutput);
+    } catch (parseError) {
+      console.error('Failed to parse JSON:', parseError);
+      this.errorMessage = 'Invalid response format from AI service.';
+      this.isLoading = false;
+      return;
+    }
+
+    console.log(response);
+
+    response.forEach((item: string) => {
+      if (!this.bokConcepts.includes(item)) {
+        this.aiBokConcepts.push(item);
+      }
+    });
+
+    console.log(response);
+    this.isLoading = false;
   }
 
   // toggle the AI generated relations
@@ -148,6 +158,10 @@ export class AiModalComponent implements OnInit, OnDestroy {
   }
 
   getBackgroundColor(concept: string) {
+    if (concept == undefined) {
+      return;
+    }
+
     return this.sharedService.getBackgroundColor(concept);
   }
 

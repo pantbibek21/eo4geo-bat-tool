@@ -26,31 +26,31 @@
           <div class="p-field-radiobutton">
             <p-radioButton
               name="annotation-depth"
-              value="high"
+              value="category"
               [(ngModel)]="annotationDepth"
               inputId="high"
             ></p-radioButton>
-            <label for="high">High</label>
+            <label for="high">Level 1: Category</label>
           </div>
 
           <div class="p-field-radiobutton">
             <p-radioButton
               name="annotation-depth"
-              value="medium"
+              value="sub_category"
               [(ngModel)]="annotationDepth"
               inputId="medium"
             ></p-radioButton>
-            <label for="medium">Medium</label>
+            <label for="medium">Level 2: Sub Category</label>
           </div>
 
           <div class="p-field-radiobutton">
             <p-radioButton
               name="annotation-depth"
-              value="low"
+              value="specific_skill"
               [(ngModel)]="annotationDepth"
               inputId="low"
             ></p-radioButton>
-            <label for="low">Low</label>
+            <label for="low">Level 3: Specific Skills</label>
           </div>
         </div>
       </fieldset>
@@ -60,7 +60,7 @@
       <p-button
         class="custom-button generate-button"
         [disabled]="!annotationDepth || isLoading"
-        (click)="generateRelation()"
+        (click)="generateAnnotations()"
       >
         <ng-container *ngIf="!isLoading; else loadingTemplate">
           Generate
@@ -91,19 +91,18 @@
           />
         </ng-container>
       </div>
-
-      <div class="annotation-actions">
-        <p-button class="annotation-submit-btn" (click)="addBokSelection()">
-          Add selected annotation
-        </p-button>
-        <p
-          *ngIf="errorMessage"
-          style="color: var(--danger-color)"
-          class="annotation-error-msg"
-        >
-          {{ errorMessage }}
-        </p>
-      </div>
+      <p-button class="annotation-submit-btn" (click)="addBokSelection()">
+        Add selected annotation
+      </p-button>
+    </div>
+    <div class="annotation-actions">
+      <p
+        *ngIf="errorMessage"
+        style="color: var(--danger-color)"
+        class="annotation-error-msg"
+      >
+        {{ errorMessage }}
+      </p>
     </div>
   </div>
 </div>
