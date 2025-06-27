@@ -9,7 +9,8 @@ import { FileService } from '../../services/file.service';
 import { AccordionModule } from 'primeng/accordion';
 import { ButtonModule } from 'primeng/button';
 import { SessionService } from '../../services/session.service';
-import { DocumentInformationComponent } from "../document-information/document-information.component";
+import { DocumentInformationComponent } from '../document-information/document-information.component';
+import { AiModalComponent } from '../ai-modal/ai-modal.component';
 
 @Component({
   standalone: true,
@@ -23,16 +24,18 @@ import { DocumentInformationComponent } from "../document-information/document-i
     CommonModule,
     AccordionModule,
     DocumentInformationComponent,
-    ButtonModule
-],
+    ButtonModule,
+    AiModalComponent,
+  ],
 })
 export class MainPageComponent implements OnInit, OnDestroy {
-  concept: string = 'GIST'
+  concept: string = 'GIST';
   logged: boolean = false;
   pdfDoc: PDFDocument | null = null;
 
   saveName: string = '';
   saveDescription: string = '';
+  isModalVisible: boolean = false;
 
   private bokRelations: string[] = [];
   private fileName: string = '';
@@ -41,22 +44,35 @@ export class MainPageComponent implements OnInit, OnDestroy {
   private pdfDocSubscription!: Subscription;
   private fileNameSubscription!: Subscription;
   private loggedSubscription!: Subscription;
+  private modalSubscription!: Subscription;
 
-  constructor(private fileService: FileService, private sessionService: SessionService) {}
+  constructor(
+    private fileService: FileService,
+    private sessionService: SessionService
+  ) {}
 
   ngOnInit(): void {
-    this.bokRelationsSubscription = this.fileService.bokConcept$.subscribe(concepts => {
-      this.bokRelations = concepts;
-    });
-    this.pdfDocSubscription = this.fileService.pdfFile$.subscribe(file => {
+    this.bokRelationsSubscription = this.fileService.bokConcept$.subscribe(
+      (concepts) => {
+        this.bokRelations = concepts;
+      }
+    );
+    this.pdfDocSubscription = this.fileService.pdfFile$.subscribe((file) => {
       this.pdfDoc = file;
     });
-    this.fileNameSubscription = this.fileService.fileName$.subscribe(name => {
+    this.fileNameSubscription = this.fileService.fileName$.subscribe((name) => {
       this.fileName = name;
     });
-    this.loggedSubscription = this.sessionService.logged$.subscribe(newValue => {
-      this.logged = newValue;
-    })
+    this.loggedSubscription = this.sessionService.logged$.subscribe(
+      (newValue) => {
+        this.logged = newValue;
+      }
+    );
+    this.modalSubscription = this.fileService.isModalVisible$.subscribe(
+      (value) => {
+        this.isModalVisible = value;
+      }
+    );
   }
 
   ngOnDestroy() {
@@ -64,6 +80,7 @@ export class MainPageComponent implements OnInit, OnDestroy {
     this.bokRelationsSubscription.unsubscribe();
     this.fileNameSubscription.unsubscribe();
     this.loggedSubscription.unsubscribe();
+    this.modalSubscription.unsubscribe();
   }
 
   updateSaveName(newValue: string) {

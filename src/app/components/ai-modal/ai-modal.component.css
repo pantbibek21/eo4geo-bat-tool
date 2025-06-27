@@ -1,0 +1,89 @@
+.modal-container {
+  width: 100%;
+  height: 100vh;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(0, 0, 0, 0.251);
+  z-index: 9999;
+}
+
+.form-container {
+  width: 880px;
+  height: auto;
+  border: 1px solid rgba(0, 0, 0, 0.425);
+  border-radius: 8px;
+  background-color: white;
+  padding: 24px;
+}
+
+input[type="number"] {
+  width: 100%;
+}
+
+.form-field {
+  margin-bottom: 12px;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: row-reverse;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.custom-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.p-field-radiobutton {
+  margin-bottom: 8px;
+}
+
+.p-field-radiobutton label {
+  margin-left: 8px;
+}
+
+.radio-group {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.radio-legend {
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.radio-options {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.annotation-chip-list {
+  border: 1px solid rgba(0, 0, 0, 0.051);
+  padding: 8px;
+  border-radius: 8px;
+  max-height: 250px;
+  overflow: auto;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.annotation-actions {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: row-reverse;
+}
+
+.annotation-error-msg {
+  line-height: 0;
+}

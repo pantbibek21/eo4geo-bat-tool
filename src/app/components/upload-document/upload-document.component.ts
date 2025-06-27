@@ -5,6 +5,7 @@ import { FileService } from '../../services/file.service';
 import { FileSelectEvent, FileUploadModule } from 'primeng/fileupload';
 import { PanelModule } from 'primeng/panel';
 import { ProgressBarModule } from 'primeng/progressbar';
+import { PdfExtractService } from '../../services/pdf-extract.service';
 
 @Component({
   selector: 'app-upload-document',
@@ -24,18 +25,24 @@ export class UploadDocumentComponent {
   pdfDoc: PDFDocument | null = null;
   private bokRelations: string[] = [];
 
-  constructor(private fileService: FileService) {}
+  constructor(
+    private fileService: FileService,
+    private pdfExtractService: PdfExtractService
+  ) {}
 
   // triggers when file is loaded
   async onFileSelected(input: FileSelectEvent) {
     if (input.files && input.files.length > 0) {
-      this.onClear()
+      this.onClear();
       const file = input.files[0];
-      if (file.type != 'application/pdf') return
+      if (file.type != 'application/pdf') return;
       this.fileName = file.name.slice(0, -4);
       this.fileSize = (file.size / (1024 * 1024)).toFixed(2) + ' MB'; // store size in mb
       this.showProgressBar = true;
       this.progress = 0; // Reset progress
+
+      // Call the service to load and store the PDF
+      await this.pdfExtractService.loadPdf(file);
 
       // create a reader object
       const reader = new FileReader();
@@ -55,15 +62,15 @@ export class UploadDocumentComponent {
       reader.readAsArrayBuffer(file);
 
       const arrayBuffer = await file.arrayBuffer();
-      this.pdfDoc = await PDFDocument.load(arrayBuffer)
+      this.pdfDoc = await PDFDocument.load(arrayBuffer);
       this.pageCount = this.pdfDoc.getPageCount();
 
       // subject key stores our RDF formatted string holding BoK relations and description together
       this.bokKeywordsRDFstring = this.pdfDoc.getSubject() || '';
       this.getBoKRelationsArray(this.bokKeywordsRDFstring);
 
-      this.fileService.setPdfFile(this.pdfDoc)
-      this.fileService.setFileName(this.fileName)
+      this.fileService.setPdfFile(this.pdfDoc);
+      this.fileService.setFileName(this.fileName);
       this.fileService.setBokConcept(this.bokRelations);
     }
   }
