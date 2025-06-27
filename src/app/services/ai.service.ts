@@ -32,7 +32,7 @@ export class AiService {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            model: 'meta-llama/llama-3.1-405b:free',
+            model: 'meta-llama/llama-3.3-70b-instruct:free',
             messages: [
               { role: 'system', content: prompt.system },
               {
@@ -58,8 +58,8 @@ export class AiService {
       return data.choices[0].message.content;
     } catch (error: any) {
       console.error('Error:', error);
-      this.setError(error); // still set your service-level error
-      return null; // <—— important!
+      this.setError(error);
+      return null;
     }
   }
 
